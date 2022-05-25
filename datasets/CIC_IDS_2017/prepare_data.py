@@ -70,10 +70,10 @@ def count_labels(label_col):
     return label_counts, label_percentages
 
 
-def split_dataset(X, y, split_rates, random_seed=None):
+def split_dataset(x, y, split_rates, random_seed=None):
     assert sum(split_rates) == 1
 
-    X_2 = X
+    x_2 = x
     y_2 = y
     result_splits = []
 
@@ -82,11 +82,11 @@ def split_dataset(X, y, split_rates, random_seed=None):
         remain_rate = 1 - (split / remain_rate_sum)
         # print("i={}, split={}, remain_rate={}, remain_rate_sum={}".format(i, split, remain_rate, remain_rate_sum))
 
-        # Split into 2 parts, X_1 and X_2
-        X_1, X_2, y_1, y_2 = train_test_split(X_2, y_2, stratify=y_2, test_size=remain_rate, random_state=random_seed)
-        result_splits.append((X_1, y_1))
+        # Split into 2 parts, x_1 and x_2
+        x_1, x_2, y_1, y_2 = train_test_split(x_2, y_2, stratify=y_2, test_size=remain_rate, random_state=random_seed)
+        result_splits.append((x_1, y_1))
 
-    result_splits.append((X_2, y_2))  # Final remaining part
+    result_splits.append((x_2, y_2))  # Final remaining part
 
     return result_splits
 
@@ -158,31 +158,31 @@ def prepare_ids2017_datasets(params):
     pd.set_option("display.float_format", "{:.4f}".format)
     logging.info("\n{}".format(label_perc))
 
-    X = all_data.loc[:, all_data.columns != "Label"]  # All columns except the last
+    x = all_data.loc[:, all_data.columns != "Label"]  # All columns except the last
     y = all_data["Label"]
 
     # Take only 8% as the small subset
     if params.ids2017_small:
         logging.info("Splitting dataset into 2 (small subset, discarded)")
-        splits = split_dataset(X, y, [0.08, 0.92])
-        (X, y), (discarded, discarded) = splits
-        logging.info("Small subset no. of examples = {}".format(X.shape[0]))
+        splits = split_dataset(x, y, [0.08, 0.92])
+        (x, y), (discarded, discarded) = splits
+        logging.info("Small subset no. of examples = {}".format(x.shape[0]))
 
     # Split into 3 sets (train, validation, test)
     logging.info("Splitting training set into 3 (train, validation, test)")
-    splits = split_dataset(X, y, [0.6, 0.2, 0.2])
-    (X_train, y_train), (X_val, y_val), (X_test, y_test) = splits
+    splits = split_dataset(x, y, [0.6, 0.2, 0.2])
+    (x_train, y_train), (x_val, y_val), (x_test, y_test) = splits
 
     # Save data files in HDF format
     logging.info("Saving prepared datasets (train, val, test) to: {}".format(params.output_dir))
 
-    write_to_hdf(X_train, params.output_dir + "/" + "X_train.h5", params.hdf_key, 5)
+    write_to_hdf(x_train, params.output_dir + "/" + "x_train.h5", params.hdf_key, 5)
     write_to_hdf(y_train, params.output_dir + "/" + "y_train.h5", params.hdf_key, 5)
 
-    write_to_hdf(X_val, params.output_dir + "/" + "X_val.h5", params.hdf_key, 5)
+    write_to_hdf(x_val, params.output_dir + "/" + "x_val.h5", params.hdf_key, 5)
     write_to_hdf(y_val, params.output_dir + "/" + "y_val.h5", params.hdf_key, 5)
 
-    write_to_hdf(X_test, params.output_dir + "/" + "X_test.h5", params.hdf_key, 5)
+    write_to_hdf(x_test, params.output_dir + "/" + "x_test.h5", params.hdf_key, 5)
     write_to_hdf(y_test, params.output_dir + "/" + "y_test.h5", params.hdf_key, 5)
 
     logging.info("Saving complete")
