@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os
 import sys
 import logging
@@ -8,42 +7,34 @@ from pprint import pformat
 import pandas as pd
 import numpy as np
 import re
-from sklearn.model_selection import train_test_split
 import zipfile
-
-
-class Params:
-    pass
 
 
 def read_csv(filename, header_row=0, dtypes=None, columns_to_read=None):
     t0 = time.time()
-    logging.info('Reading CSV dataset {}'.format(filename))
+    logging.info("Reading CSV dataset {}".format(filename))
 
     if columns_to_read is not None:
         dataset_df = pd.read_csv(filename, header=header_row, dtype=dtypes, usecols=columns_to_read)
     else:
         dataset_df = pd.read_csv(filename, header=header_row, dtype=dtypes)
 
-    logging.info('Reading complete. time_to_read={:.2f} sec'.format(time.time() - t0))
+    logging.info("Reading complete. time_to_read={:.2f} sec".format(time.time() - t0))
 
-    return dataset_df  # This is a Pandas DataFrame
+    return dataset_df
 
 
-def write_to_hdf(df, filename, key, compression_level, mode='a', format='fixed'):
-    logging.info('Writing dataset to HDF5 format. filename={}'.format(filename))
+def write_to_hdf(df, filename, key, compression_level, mode="a", fmt="fixed"):
+    logging.info("Writing dataset to HDF5 format. filename={}".format(filename))
     t0 = time.time()
 
-    df.to_hdf(filename, key=key, mode=mode, complevel=compression_level, complib='zlib', format=format)
+    df.to_hdf(filename, key=key, mode=mode, complevel=compression_level, complib="zlib", format=fmt)
 
-    logging.info('Writing complete. time_to_write={}'.format(time.time() - t0))
+    logging.info("Writing complete. time_to_write={}".format(time.time() - t0))
 
 
-def load_datasets(files_list, header_row=0, strip_col_name_spaces=False, dtypes=None, columns_to_read=None):
-    def strip_whitespaces(str):
-        return str.strip()
-
-    logging.info('Loading datasets in files')
+def load_datasets(files_list, header_row=0, dtypes=None, columns_to_read=None):
+    logging.info("Loading datasets in files")
 
     dfs = []
     for filename in files_list:
@@ -52,10 +43,10 @@ def load_datasets(files_list, header_row=0, strip_col_name_spaces=False, dtypes=
 
     all_data = pd.concat(dfs, ignore_index=True)
 
-    if strip_col_name_spaces:
-        all_data.rename(columns=strip_whitespaces, inplace=True)
+    all_data.columns = all_data.columns.str.strip()
+    all_data.columns = all_data.columns.str.replace(" ", "_")
 
-    logging.info('Loading datasets complete')
+    logging.info("Loading datasets complete")
     return all_data
 
 
@@ -68,27 +59,6 @@ def count_labels(label_col):
     label_percentages = label_counts / total_count
 
     return label_counts, label_percentages
-
-
-def split_dataset(x, y, split_rates, random_seed=None):
-    assert sum(split_rates) == 1
-
-    x_2 = x
-    y_2 = y
-    result_splits = []
-
-    for i, split in enumerate(split_rates[:-1]):  # Must not split at the last element
-        remain_rate_sum = sum(split_rates[i:])
-        remain_rate = 1 - (split / remain_rate_sum)
-        # print("i={}, split={}, remain_rate={}, remain_rate_sum={}".format(i, split, remain_rate, remain_rate_sum))
-
-        # Split into 2 parts, x_1 and x_2
-        x_1, x_2, y_1, y_2 = train_test_split(x_2, y_2, stratify=y_2, test_size=remain_rate, random_state=random_seed)
-        result_splits.append((x_1, y_1))
-
-    result_splits.append((x_2, y_2))  # Final remaining part
-
-    return result_splits
 
 
 def initial_setup(output_dir, params):
@@ -105,22 +75,46 @@ def initial_setup(output_dir, params):
     )
     logging.info("Initialized logging. log_filename = {}".format(log_filename))
 
-    logging.info("Running script with following parameters\n{}".format(pformat(params.__dict__)))
+    logging.info("Running script with following parameters\n{}".format(pformat(params)))
 
 
-def print_dataset_sizes(datasets):
-    (X_train, y_train), (X_val, y_val), (X_test, y_test) = datasets
-    logging.info("No. of features = {}".format(X_train.shape[1]))
-    logging.info("Training examples = {}".format(X_train.shape[0]))
-    logging.info("Validation examples = {}".format(X_val.shape[0]))
-    logging.info("Test examples = {}".format(X_test.shape[0]))
+def split_datasets(all_data, params):
+    # ignore labels with small number of datapoint
+    df = all_data.groupby("Label").filter(lambda x: len(x) > params["data_per_label"]).copy()
+    remaining_df = all_data.drop(df.index)  # save for later usages
+
+    df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["data_per_label"]))
+    train_sample_count_per_label = int(params["data_per_label"] * 0.6)
+    test_sample_count_per_label = int(params["data_per_label"] * 0.2)
+
+    train_df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(train_sample_count_per_label)).copy()
+    df.drop(train_df.index, inplace=True)
+    test_df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(test_sample_count_per_label)).copy()
+    df.drop(test_df.index, inplace=True)
+    validation_df = df
+
+    x_train = train_df.loc[:, train_df.columns != "Label"]
+    y_train = train_df["Label"]
+
+    x_test = test_df.loc[:, test_df.columns != "Label"]
+    y_test = test_df["Label"]
+
+    x_validation = validation_df.loc[:, validation_df.columns != "Label"]
+    y_validation = validation_df["Label"]
+
+    logging.info("Train set {}".format(train_df["Label"].value_counts()))
+    logging.info("Test set :\n{}".format(test_df["Label"].value_counts()))
+    logging.info("Validation set :\n{}".format(validation_df["Label"].value_counts()))
+    logging.info("Validation set :\n{}".format(validation_df["Label"].value_counts()))
+
+    return (x_train, y_train), (x_test, y_test), (x_validation, y_validation), remaining_df
 
 
 def prepare_ids2017_datasets(params):
     # Load data
     logging.info("Loading datasets")
-    data_files_list = [params.ids2017_datasets_dir + "/" + filename for filename in params.ids2017_files_list]
-    all_data = load_datasets(data_files_list, header_row=0, strip_col_name_spaces=True)
+    data_files_list = [params["ids2017_datasets_dir"] + "/" + filename for filename in params["ids2017_files_list"]]
+    all_data = load_datasets(data_files_list, header_row=0)
 
     # Remove unicode values in class labels
     logging.info("Converting unicode labels to ascii")
@@ -130,24 +124,16 @@ def prepare_ids2017_datasets(params):
     # Following type conversion and casting (both) are necessary to convert the values in cols 14, 15 detected as objects
     # Otherwise, the training algorithm does not work as expected
     logging.info("Converting object type in columns 14, 15 to float64")
-    all_data["Flow Bytes/s"] = all_data["Flow Bytes/s"].apply(lambda x: np.float64(x))
-    all_data["Flow Packets/s"] = all_data["Flow Packets/s"].apply(lambda x: np.float64(x))
-    all_data["Flow Bytes/s"] = all_data["Flow Bytes/s"].astype(np.float64)
-    all_data["Flow Packets/s"] = all_data["Flow Packets/s"].astype(np.float64)
+    all_data["Flow_Bytes/s"] = all_data["Flow_Bytes/s"].apply(lambda x: np.float64(x))
+    all_data["Flow_Packets/s"] = all_data["Flow_Packets/s"].apply(lambda x: np.float64(x))
+    all_data["Flow_Bytes/s"] = all_data["Flow_Bytes/s"].astype(np.float64)
+    all_data["Flow_Packets/s"] = all_data["Flow_Packets/s"].astype(np.float64)
 
-    # Remove some invalid values/ rows in the dataset
-    # nan_counts = all_data.isna().sum()
-    # logging.info(nan_counts)
     logging.info("Removing invalid values (inf, nan)")
     prev_rows = all_data.shape[0]
     all_data.replace([np.inf, -np.inf], np.nan, inplace=True)
     all_data.dropna(inplace=True)  # Some rows (1358) have NaN values in the Flow Bytes/s column. Get rid of them
     logging.info("Removed no. of rows = {}".format(prev_rows - all_data.shape[0]))
-
-    # Remove samples from classes with a very small no. of samples (cannot split with those classes)
-    logging.info("Removing instances of rare classes")
-    rare_classes = ["Infiltration", "Web Attack Sql Injection", "Heartbleed"]
-    all_data.drop(all_data[all_data["Label"].isin(rare_classes)].index, inplace=True)  # Inplace drop
 
     # Check class labels
     label_counts, label_perc = count_labels(all_data["Label"])
@@ -158,74 +144,55 @@ def prepare_ids2017_datasets(params):
     pd.set_option("display.float_format", "{:.4f}".format)
     logging.info("\n{}".format(label_perc))
 
-    x = all_data.loc[:, all_data.columns != "Label"]  # All columns except the last
-    y = all_data["Label"]
-
-    # Take only 8% as the small subset
-    if params.ids2017_small:
-        logging.info("Splitting dataset into 2 (small subset, discarded)")
-        splits = split_dataset(x, y, [0.08, 0.92])
-        (x, y), (discarded, discarded) = splits
-        logging.info("Small subset no. of examples = {}".format(x.shape[0]))
-
-    # Split into 3 sets (train, validation, test)
-    logging.info("Splitting training set into 3 (train, validation, test)")
-    splits = split_dataset(x, y, [0.6, 0.2, 0.2])
-    (x_train, y_train), (x_val, y_val), (x_test, y_test) = splits
-
+    (x_train, y_train), (x_test, y_test), (x_validation, y_validation), remaining_df = split_datasets(all_data, params)
     # Save data files in HDF format
-    logging.info("Saving prepared datasets (train, val, test) to: {}".format(params.output_dir))
+    logging.info("Saving prepared datasets (train, val, test) to: {}".format(params["output_dir"]))
 
-    write_to_hdf(x_train, params.output_dir + "/" + "x_train.h5", params.hdf_key, 5)
-    write_to_hdf(y_train, params.output_dir + "/" + "y_train.h5", params.hdf_key, 5)
+    write_to_hdf(x_train, params["output_dir"] + "/" + "x_train.h5", params["hdf_key"], 5)
+    write_to_hdf(y_train, params["output_dir"] + "/" + "y_train.h5", params["hdf_key"], 5)
 
-    write_to_hdf(x_val, params.output_dir + "/" + "x_val.h5", params.hdf_key, 5)
-    write_to_hdf(y_val, params.output_dir + "/" + "y_val.h5", params.hdf_key, 5)
+    write_to_hdf(x_test, params["output_dir"] + "/" + "x_test.h5", params["hdf_key"], 5)
+    write_to_hdf(y_test, params["output_dir"] + "/" + "y_test.h5", params["hdf_key"], 5)
 
-    write_to_hdf(x_test, params.output_dir + "/" + "x_test.h5", params.hdf_key, 5)
-    write_to_hdf(y_test, params.output_dir + "/" + "y_test.h5", params.hdf_key, 5)
+    write_to_hdf(x_validation, params["output_dir"] + "/" + "x_validation.h5", params["hdf_key"], 5)
+    write_to_hdf(y_validation, params["output_dir"] + "/" + "y_validation.h5", params["hdf_key"], 5)
+
+    write_to_hdf(remaining_df, params["output_dir"] + "/" + "remaining_df.h5", params["hdf_key"], 5)
 
     logging.info("Saving complete")
 
-    print_dataset_sizes(splits)
+    logging.info("No. of features = {}".format(x_train.shape[1]))
+    logging.info("{} Labels used = \n{}".format(len(y_train.unique()), ", ".join([str(x) for x in y_train.unique()])))
+    logging.info("Training examples = {}".format(x_train.shape[0]))
+    logging.info("Test examples = {}".format(x_test.shape[0]))
+    logging.info("Validation examples = {}".format(x_validation.shape[0]))
 
 
 def extract_databases():
-    dataset_zips = ["GeneratedLabelledFlows", "MachineLearningCSV"]
+    # dataset_zips = ["GeneratedLabelledFlows", "MachineLearningCSV"]
+    dataset_zips = ["MachineLearningCSV"]
     for dataset_zip_name in dataset_zips:
         if not os.path.isdir(dataset_zip_name):
             with zipfile.ZipFile(dataset_zip_name + ".zip", "r") as zip_ref:
                 zip_ref.extractall(dataset_zip_name)
 
 
-def main():
+def main(params):
     extract_databases()
-
-    initial_setup(params.output_dir, params)
-
-    prepare_ids2017_datasets(params)  # Small subset vs. full is controlled by config flag
-
+    initial_setup(params["output_dir"], params)
+    prepare_ids2017_datasets(params)
     logging.info("Data preparation complete")
 
 
 if __name__ == "__main__":
-    # Script params
-    params = Params()
+    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "data_per_label": 1500}
 
-    # Common params
-    params.hdf_key = "cic_ids_2017"
+    if len(sys.argv) > 1 and sys.argv[1].isnumeric():
+        parameters["data_per_label"] = int(sys.argv[1])
+    parameters["output_dir"] = parameters["output_dir"] + "_" + str(parameters["data_per_label"])
 
-    # IDS 2017 params
-    params.ids2017_small = len(sys.argv) < 2 or sys.argv[1] != "--full"
-    # params.ids2017_small = False
-
-    if params.ids2017_small:
-        params.output_dir = "cic_ids_2017_small"
-    else:
-        params.output_dir = "cic_ids_2017_full"
-
-    params.ids2017_datasets_dir = "MachineLearningCSV/MachineLearningCVE"
-    params.ids2017_files_list = [
+    parameters["ids2017_datasets_dir"] = "MachineLearningCSV/MachineLearningCVE"
+    parameters["ids2017_files_list"] = [
         "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
         "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
         "Friday-WorkingHours-Morning.pcap_ISCX.csv",
@@ -236,9 +203,4 @@ if __name__ == "__main__":
         "Wednesday-workingHours.pcap_ISCX.csv"
     ]
 
-    params.ids2017_hist_num_bins = 10000
-
-    params.ids2017_flows_dir = "GeneratedLabelledFlows/TrafficLabelling"
-    params.ids2017_flow_seqs_max_flow_seq_length = 100
-    params.ids2017_flow_seqs_max_flow_duration_secs = 3
-    main()
+    main(parameters)
