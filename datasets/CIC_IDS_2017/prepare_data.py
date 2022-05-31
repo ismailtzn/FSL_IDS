@@ -81,9 +81,9 @@ def initial_setup(output_dir, params):
 def split_datasets(all_data, params):
     # ignore labels with small number of datapoint
     df = all_data.groupby("Label").filter(lambda x: len(x) > params["data_per_label"]).copy()
-    remaining_df = all_data.drop(df.index)  # save for later usages
-
     df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["data_per_label"]))
+
+    remaining_df = all_data.drop(df.index)  # save for later usages
     train_sample_count_per_label = int(params["data_per_label"] * 0.6)
     test_sample_count_per_label = int(params["data_per_label"] * 0.2)
 
