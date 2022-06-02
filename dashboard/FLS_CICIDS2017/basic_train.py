@@ -27,8 +27,7 @@ def train(model, optimizer, train_x, train_y, n_way, n_support, n_query, max_epo
         max_epoch (int): max epochs to train on
         epoch_size (int): episodes per epoch
     """
-    # divide the learning rate by 2 at each epoch
-    scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.5, last_epoch=-1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.75, last_epoch=-1)
     epoch = 0  # epochs done so far
     stop = False  # status to know when to stop
 
@@ -81,7 +80,7 @@ def basic_train_test():
 
     n_way = 11
     n_support = 5
-    n_query = 5
+    n_query = 25
     sample_count = n_support + n_query
     (train_x, train_y), (test_x, test_y) = utility.load_datasets("../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_150")
 
@@ -92,13 +91,13 @@ def basic_train_test():
     print("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
 
     model = utility.load_protonet_conv(
-        x_dim=(78, 1),
+        x_dim=(1, 78),
         hid_dim=64,
         z_dim=64,
     )
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    max_epoch = 5
+    max_epoch = 10
     epoch_size = 1000
 
     train(model, optimizer, train_x, train_y, n_way, n_support, n_query, max_epoch, epoch_size)

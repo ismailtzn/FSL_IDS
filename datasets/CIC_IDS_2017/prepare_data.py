@@ -105,7 +105,6 @@ def split_datasets(all_data, params):
     logging.info("Train set {}".format(train_df["Label"].value_counts()))
     logging.info("Test set :\n{}".format(test_df["Label"].value_counts()))
     logging.info("Validation set :\n{}".format(validation_df["Label"].value_counts()))
-    logging.info("Validation set :\n{}".format(validation_df["Label"].value_counts()))
 
     return (x_train, y_train), (x_test, y_test), (x_validation, y_validation), remaining_df
 

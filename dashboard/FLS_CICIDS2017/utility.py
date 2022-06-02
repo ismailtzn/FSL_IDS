@@ -105,7 +105,7 @@ def extract_sample(n_way, n_support, n_query, data_x, data_y):
         sample.append(sample_cls)
     sample = np.array(sample)
     sample = torch.from_numpy(sample).float()
-    sample = sample.view(n_way, (n_support + n_query), 78, 1)
+    sample = sample.view(n_way, (n_support + n_query), 1, 78)
     return ({
         "sample_data": sample,
         "n_way": n_way,
@@ -118,9 +118,9 @@ def load_protonet_conv(**kwargs):
     """
     Loads the prototypical network model
     Arg:
-        x_dim (tuple): dimension of input image
+        x_dim (tuple): dimension of input instance
         hid_dim (int): dimension of hidden layers in conv blocks
-        z_dim (int): dimension of embedded image
+        z_dim (int): dimension of embedded instance
     Returns:
         Model (Class ProtoNet)
     """
@@ -130,7 +130,7 @@ def load_protonet_conv(**kwargs):
 
     def conv_block(in_channels, out_channels):
         return nn.Sequential(
-            nn.Conv1d(in_channels, out_channels, 1, padding=1),
+            nn.Conv1d(in_channels, out_channels, 3, padding=1),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(),
             nn.MaxPool1d(2)

@@ -22,6 +22,7 @@ class ProtoNet(nn.Module):
         """
         super(ProtoNet, self).__init__()
         self.encoder = encoder.cuda()
+        print(self.encoder)
 
     def set_forward_loss(self, sample):
         """
@@ -44,12 +45,14 @@ class ProtoNet(nn.Module):
 
         # target indices are 0 ... n_way-1
         target_inds = torch.arange(0, n_way).view(n_way, 1, 1).expand(n_way, n_query, 1).long()
-        target_inds = Variable(target_inds, requires_grad=False)
+        # target_inds = Variable(target_inds, requires_grad=False)
         target_inds = target_inds.cuda()
+        target_inds.requires_grad_(False)
 
         # encode data of the support and the query set
-        x = torch.cat([x_support.contiguous().view(n_way * n_support, *x_support.size()[2:]),
-                       x_query.contiguous().view(n_way * n_query, *x_query.size()[2:])], 0)
+        example_dimension = x_support.size()[2:]
+        x = torch.cat([x_support.contiguous().view(n_way * n_support, *example_dimension),
+                       x_query.contiguous().view(n_way * n_query, *example_dimension)], 0)
 
         z = self.encoder.forward(x)
         z_dim = z.size(-1)  # usually 64
