@@ -2,6 +2,7 @@ numpy
 pandas
 sckit-learn
 matplotlib
+tables
 
 h5py==3.6
 torch>=1.11

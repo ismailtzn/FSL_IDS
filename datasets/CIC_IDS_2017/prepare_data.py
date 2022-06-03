@@ -78,38 +78,35 @@ def initial_setup(output_dir, params):
     logging.info("Running script with following parameters\n{}".format(pformat(params)))
 
 
-def split_datasets(all_data, params):
+def split_meta_datasets(all_data, params):
     # ignore labels with small number of datapoint
-    df = all_data.groupby("Label").filter(lambda x: len(x) > params["data_per_label"]).copy()
-    df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["data_per_label"]))
+    df = all_data.groupby("Label").filter(lambda x: len(x) >= params["sample_per_class"]).copy()
+    df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["sample_per_class"]))
 
-    remaining_df = all_data.drop(df.index)  # save for later usages
-    train_sample_count_per_label = int(params["data_per_label"] * 0.6)
-    test_sample_count_per_label = int(params["data_per_label"] * 0.2)
+    labels = df["Label"].unique().copy()
+    np.random.shuffle(labels)
+    meta_train_labels = labels[:-params["meta_train_class_count"]]
+    meta_test_labels = labels[-params["meta_train_class_count"]:]
+    meta_train_df = df[df["Label"].isin(meta_train_labels)].copy()
+    meta_test_df = df[df["Label"].isin(meta_test_labels)].copy()
 
-    train_df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(train_sample_count_per_label)).copy()
-    df.drop(train_df.index, inplace=True)
-    test_df = df.groupby("Label", group_keys=False).apply(lambda x: x.sample(test_sample_count_per_label)).copy()
-    df.drop(test_df.index, inplace=True)
-    validation_df = df
+    remaining_df = all_data.drop(meta_train_df.index)  # save for later usages
+    remaining_df = remaining_df.drop(meta_test_df.index)  # save for later usages
 
-    x_train = train_df.loc[:, train_df.columns != "Label"]
-    y_train = train_df["Label"]
+    x_meta_train = meta_train_df.loc[:, meta_train_df.columns != "Label"]
+    y_meta_train = meta_train_df["Label"]
 
-    x_test = test_df.loc[:, test_df.columns != "Label"]
-    y_test = test_df["Label"]
+    x_meta_test = meta_test_df.loc[:, meta_test_df.columns != "Label"]
+    y_meta_test = meta_test_df["Label"]
 
-    x_validation = validation_df.loc[:, validation_df.columns != "Label"]
-    y_validation = validation_df["Label"]
+    logging.info("Train set :\n{}".format(meta_train_df["Label"].value_counts()))
+    logging.info("Test set :\n{}".format(meta_test_df["Label"].value_counts()))
+    logging.info("Remaining df :\n{}".format(remaining_df["Label"].value_counts()))
 
-    logging.info("Train set {}".format(train_df["Label"].value_counts()))
-    logging.info("Test set :\n{}".format(test_df["Label"].value_counts()))
-    logging.info("Validation set :\n{}".format(validation_df["Label"].value_counts()))
-
-    return (x_train, y_train), (x_test, y_test), (x_validation, y_validation), remaining_df
+    return x_meta_train, y_meta_train, x_meta_test, y_meta_test, remaining_df
 
 
-def prepare_ids2017_datasets(params):
+def pre_process_dataset(params):
     # Load data
     logging.info("Loading datasets")
     data_files_list = [params["ids2017_datasets_dir"] + "/" + filename for filename in params["ids2017_files_list"]]
@@ -142,29 +139,30 @@ def prepare_ids2017_datasets(params):
     logging.info("Label percentages below")
     pd.set_option("display.float_format", "{:.4f}".format)
     logging.info("\n{}".format(label_perc))
+    return all_data
 
-    (x_train, y_train), (x_test, y_test), (x_validation, y_validation), remaining_df = split_datasets(all_data, params)
+
+def prepare_ids2017_datasets(params):
+    all_data = pre_process_dataset(params)
+
+    x_meta_train, y_meta_train, x_meta_test, y_meta_test, remaining_df = split_meta_datasets(all_data, params)
     # Save data files in HDF format
     logging.info("Saving prepared datasets (train, val, test) to: {}".format(params["output_dir"]))
 
-    write_to_hdf(x_train, params["output_dir"] + "/" + "x_train.h5", params["hdf_key"], 5)
-    write_to_hdf(y_train, params["output_dir"] + "/" + "y_train.h5", params["hdf_key"], 5)
+    write_to_hdf(x_meta_train, params["output_dir"] + "/" + "x_meta_train.h5", params["hdf_key"], 5)
+    write_to_hdf(y_meta_train, params["output_dir"] + "/" + "y_meta_train.h5", params["hdf_key"], 5)
 
-    write_to_hdf(x_test, params["output_dir"] + "/" + "x_test.h5", params["hdf_key"], 5)
-    write_to_hdf(y_test, params["output_dir"] + "/" + "y_test.h5", params["hdf_key"], 5)
-
-    write_to_hdf(x_validation, params["output_dir"] + "/" + "x_validation.h5", params["hdf_key"], 5)
-    write_to_hdf(y_validation, params["output_dir"] + "/" + "y_validation.h5", params["hdf_key"], 5)
+    write_to_hdf(x_meta_test, params["output_dir"] + "/" + "x_meta_test.h5", params["hdf_key"], 5)
+    write_to_hdf(y_meta_test, params["output_dir"] + "/" + "y_meta_test.h5", params["hdf_key"], 5)
 
     write_to_hdf(remaining_df, params["output_dir"] + "/" + "remaining_df.h5", params["hdf_key"], 5)
 
     logging.info("Saving complete")
 
-    logging.info("No. of features = {}".format(x_train.shape[1]))
-    logging.info("{} Labels used = \n{}".format(len(y_train.unique()), ", ".join([str(x) for x in y_train.unique()])))
-    logging.info("Training examples = {}".format(x_train.shape[0]))
-    logging.info("Test examples = {}".format(x_test.shape[0]))
-    logging.info("Validation examples = {}".format(x_validation.shape[0]))
+    logging.info("Meta train dataset shape = {}".format(x_meta_train.shape))
+    logging.info("Meta test dataset shape = {}".format(x_meta_test.shape))
+    logging.info("{} Labels used int meta train = \n{}".format(len(y_meta_train.unique()), ", ".join([str(x) for x in y_meta_train.unique()])))
+    logging.info("{} Labels used int meta test = \n{}".format(len(y_meta_test.unique()), ", ".join([str(x) for x in y_meta_test.unique()])))
 
 
 def extract_databases():
@@ -184,11 +182,11 @@ def main(params):
 
 
 if __name__ == "__main__":
-    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "data_per_label": 1500}
+    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "sample_per_class": 21, "meta_train_class_count": 5}
 
     if len(sys.argv) > 1 and sys.argv[1].isnumeric():
-        parameters["data_per_label"] = int(sys.argv[1])
-    parameters["output_dir"] = parameters["output_dir"] + "_" + str(parameters["data_per_label"])
+        parameters["sample_per_class"] = int(sys.argv[1])
+    parameters["output_dir"] = parameters["output_dir"] + "_" + str(parameters["sample_per_class"])
 
     parameters["ids2017_datasets_dir"] = "MachineLearningCSV/MachineLearningCVE"
     parameters["ids2017_files_list"] = [

@@ -2,17 +2,14 @@ import numpy as np
 import pandas as pd
 import glob
 import torch
-import torch
 import torch.nn as nn
 import torch.nn.functional
-import torch.optim as optim
-from torch.autograd import Variable
 import ProtoNet
 
 
 def load_train_datasets(data_dir, hdf_key="cic_ids_2017"):
-    x_train_files = glob.glob(data_dir + "/" + "x_train*")
-    y_train_files = glob.glob(data_dir + "/" + "y_train*")
+    x_train_files = glob.glob(data_dir + "/" + "x_meta_train*")
+    y_train_files = glob.glob(data_dir + "/" + "y_meta_train*")
 
     x_train_files.sort()
     y_train_files.sort()
@@ -26,12 +23,12 @@ def load_train_datasets(data_dir, hdf_key="cic_ids_2017"):
     x_train = pd.concat(x_train_dfs)
     y_train = pd.concat(y_train_dfs)
 
-    return (x_train, y_train)
+    return x_train, y_train
 
 
 def load_test_datasets(data_dir, hdf_key="cic_ids_2017"):
-    x_test_files = glob.glob(data_dir + "/" + "x_test*")
-    y_test_files = glob.glob(data_dir + "/" + "y_test*")
+    x_test_files = glob.glob(data_dir + "/" + "x_meta_test*")
+    y_test_files = glob.glob(data_dir + "/" + "y_meta_test*")
 
     x_test_files.sort()
     y_test_files.sort()
@@ -42,7 +39,7 @@ def load_test_datasets(data_dir, hdf_key="cic_ids_2017"):
     x_test = pd.concat(x_test_dfs)
     y_test = pd.concat(y_test_dfs)
 
-    return (x_test, y_test)
+    return x_test, y_test
 
 
 def load_datasets(data_dir, hdf_key="cic_ids_2017"):
@@ -88,11 +85,7 @@ def extract_sample(n_way, n_support, n_query, data_x, data_y):
         data_x (np.array): dataset of samples
         data_y (np.array): dataset of labels
     Returns:
-        (dict) of:
           (torch.Tensor): sample. Size (n_way, n_support+n_query, (dim))
-          (int): n_way
-          (int): n_support
-          (int): n_query
     """
     sample = []
     available_classes = get_available_classes(data_y, (n_support + n_query))
@@ -106,12 +99,8 @@ def extract_sample(n_way, n_support, n_query, data_x, data_y):
     sample = np.array(sample)
     sample = torch.from_numpy(sample).float()
     sample = sample.view(n_way, (n_support + n_query), 1, 78)
-    return ({
-        "sample_data": sample,
-        "n_way": n_way,
-        "n_support": n_support,
-        "n_query": n_query
-    })
+
+    return sample
 
 
 def load_protonet_conv(**kwargs):
@@ -127,6 +116,9 @@ def load_protonet_conv(**kwargs):
     x_dim = kwargs["x_dim"]
     hid_dim = kwargs["hid_dim"]
     z_dim = kwargs["z_dim"]
+    n_way = kwargs["n_way"]
+    n_support = kwargs["n_support"]
+    n_query = kwargs["n_query"]
 
     def conv_block(in_channels, out_channels):
         return nn.Sequential(
@@ -144,4 +136,4 @@ def load_protonet_conv(**kwargs):
         ProtoNet.Flatten()
     )
 
-    return ProtoNet.ProtoNet(encoder)
+    return ProtoNet.ProtoNet(encoder, n_way, n_support, n_query)
