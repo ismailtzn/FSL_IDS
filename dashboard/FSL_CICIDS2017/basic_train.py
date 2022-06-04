@@ -1,3 +1,7 @@
+import logging
+import os
+from pprint import pformat
+
 import torch
 import torch.nn.functional
 import torch.optim as optim
@@ -47,7 +51,7 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer):
 
         epoch_loss = running_loss / epoch_size
         epoch_acc = running_acc / epoch_size
-        print("\rEpoch {:d} -- Loss: {:.4f} Acc: {:.4f}".format(epoch + 1, epoch_loss, epoch_acc))
+        logging.info("Epoch {:d} -- Loss: {:.4f} Acc: {:.4f}".format(epoch + 1, epoch_loss, epoch_acc))
         writer.add_scalar("Meta Train Accuracy/Epochs", epoch_acc, epoch)
         writer.add_scalar("Meta Train Loss/Epochs", epoch_loss, epoch)
         writer.flush()
@@ -90,7 +94,7 @@ def test(model, test_x, test_y, test_episode, writer):
         running_acc += acc_val
     avg_loss = running_loss / test_episode
     avg_acc = running_acc / test_episode
-    print("\rTest results -- Loss: {:.4f} Acc: {:.4f}".format(avg_loss, avg_acc))
+    logging.info("\rTest results -- Loss: {:.4f} Acc: {:.4f}".format(avg_loss, avg_acc))
 
     param_dict = {
         "meta_episode": test_episode,
@@ -108,7 +112,9 @@ def test(model, test_x, test_y, test_episode, writer):
 def parse_configuration():
     # TODO::: implement config parser here!
     config = {
-        "tb_dir_prefix": "prototypical",
+        "log_dir": "logs",
+        "experiment_dir_prefix": "prototypical",
+        "experiment_time": datetime.now().strftime("%Y_%m_%d:%H_%M_%S"),
         "meta_train_n_way": 5,
         "meta_train_k_shot": 5,
         "meta_train_query_count": 5,
@@ -127,13 +133,11 @@ def parse_configuration():
     return config
 
 
-def basic_train_test():
+def basic_train_test(config):
     # Check GPU support, please do activate GPU
-    print("GPU is ready: {}".format(torch.cuda.is_available()))
+    logging.info("GPU is ready: {}".format(torch.cuda.is_available()))
 
-    config = parse_configuration()
-
-    log_dir = "runs/{}/{}".format(config["tb_dir_prefix"], datetime.now().strftime("%Y_%m_%d:%H_%M_%S"))
+    log_dir = "runs/{}_{}".format(config["experiment_dir_prefix"], config["experiment_time"])
 
     writer = SummaryWriter(log_dir)
 
@@ -144,10 +148,10 @@ def basic_train_test():
 
     (train_x, train_y), (test_x, test_y) = utility.load_datasets("../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
 
-    print("n_way: {}, n_support: {}, n_query: {}".format(n_way, n_support, n_query))
-    print("Shapes => train_x:{}, train_y:{}, test_x:{}, test_y:{}".format(train_x.shape, train_y.shape, test_x.shape, test_y.shape))
-    print("Train Data classes: {}".format(utility.get_available_classes(train_y, sample_count)))
-    print("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
+    logging.info("n_way: {}, n_support: {}, n_query: {}".format(n_way, n_support, n_query))
+    logging.info("Shapes => train_x:{}, train_y:{}, test_x:{}, test_y:{}".format(train_x.shape, train_y.shape, test_x.shape, test_y.shape))
+    logging.info("Train Data classes: {}".format(utility.get_available_classes(train_y, sample_count)))
+    logging.info("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
 
     model = utility.load_protonet_conv(
         x_dim=config["model_x_dim"],
@@ -158,6 +162,7 @@ def basic_train_test():
         n_query=n_query
     )
 
+    logging.info(model.encoder)
     writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
     writer.flush()
 
@@ -177,5 +182,24 @@ def basic_train_test():
     writer.close()
 
 
+def initialize_logger(config):
+    if not os.path.exists(config["log_dir"]):
+        os.makedirs(config["log_dir"])
+
+    # Setup logging
+    log_filename = "{}/run_{}_{}.log".format(config["log_dir"], config["experiment_dir_prefix"], config["experiment_time"])
+
+    logging.basicConfig(
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[logging.FileHandler(log_filename, "w+"), logging.StreamHandler()],
+        level=logging.INFO
+    )
+    logging.info("Initialized logging. log_filename = {}".format(log_filename))
+
+    logging.info("Running script with following parameters\n{}".format(pformat(config)))
+
+
 if __name__ == "__main__":
-    basic_train_test()
+    config = parse_configuration()
+    initialize_logger(config)
+    basic_train_test(config)

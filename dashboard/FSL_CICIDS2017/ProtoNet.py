@@ -21,7 +21,6 @@ class ProtoNet(nn.Module):
         self.n_way = n_way
         self.n_support = n_support
         self.n_query = n_query
-        print(self.encoder)
 
     def pre_process_meta_sample(self, meta_sample):
         sample_data = meta_sample.cuda()
