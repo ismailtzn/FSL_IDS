@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional
 import ProtoNet
+from torch.utils.tensorboard.summary import hparams
+from torch.utils.tensorboard import SummaryWriter
 
 
 def load_train_datasets(data_dir, hdf_key="cic_ids_2017"):
@@ -137,3 +139,15 @@ def load_protonet_conv(**kwargs):
     )
 
     return ProtoNet.ProtoNet(encoder, n_way, n_support, n_query)
+
+
+def add_hparams(writer, param_dict, metrics_dict):
+    exp, ssi, sei = hparams(param_dict, metrics_dict)
+    writer.file_writer.add_summary(exp)
+    writer.file_writer.add_summary(ssi)
+    writer.file_writer.add_summary(sei)
+    for k, v in metrics_dict.items():
+        writer.add_scalar(k, v)
+
+
+setattr(SummaryWriter, "add_hparams", add_hparams)

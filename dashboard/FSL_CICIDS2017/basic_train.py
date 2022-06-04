@@ -6,6 +6,7 @@ import utility
 from tqdm import tqdm
 
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 
 def train(model, train_x, train_y, max_epoch, epoch_size, writer):
@@ -24,11 +25,10 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer):
     scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.75, last_epoch=-1)
 
     epoch = 0  # epochs done so far
-    stop = False  # status to know when to stop
+    epoch_acc = 0
+    epoch_loss = 0
 
-
-
-    while epoch < max_epoch and not stop:
+    while epoch < max_epoch:
         running_loss = 0.0
         running_acc = 0.0
 
@@ -55,14 +55,16 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer):
         epoch += 1
         scheduler.step()
 
-    writer.add_hparams(
-        {"lr": lr, "max_epoch": max_epoch},
-        {
-            "accuracy": epoch_acc,
-            "loss": epoch_loss,
-        },
-    )
-    writer.flush()
+    param_dict = {
+        "lr": lr,
+        "max_epoch": max_epoch
+    }
+    metric_dict = {
+        "meta_train/accuracy": epoch_acc,
+        "meta_train/loss": epoch_loss,
+    }
+
+    return param_dict, metric_dict
 
 
 def test(model, test_x, test_y, test_episode, writer):
@@ -90,16 +92,54 @@ def test(model, test_x, test_y, test_episode, writer):
     avg_acc = running_acc / test_episode
     print("\rTest results -- Loss: {:.4f} Acc: {:.4f}".format(avg_loss, avg_acc))
 
+    param_dict = {
+        "meta_episode": test_episode,
+        "meta_test_n": model.n_way,
+        "meta_test_k": model.n_support,
+        "meta_test_q": model.n_query
+    }
+    metric_dict = {
+        "meta_test/accuracy": avg_acc,
+        "meta_test/loss": avg_loss,
+    }
+    return param_dict, metric_dict
+
+
+def parse_configuration():
+    # TODO::: implement config parser here!
+    config = {
+        "tb_dir_prefix": "prototypical",
+        "meta_train_n_way": 5,
+        "meta_train_k_shot": 5,
+        "meta_train_query_count": 5,
+        "meta_train_max_epoch": 10,
+        "meta_train_epoch_size": 1000,
+        "dataset_dir": "../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21",
+        "model_x_dim": (1, 78),
+        "model_hid_dim": 64,
+        "model_z_dim": 64,
+        "save_model_path": "latest_model",
+        "meta_test_n_way": 5,
+        "meta_test_k_shot": 5,
+        "meta_test_query_count": 5,
+        "meta_test_episode_count": 5
+    }
+    return config
+
 
 def basic_train_test():
     # Check GPU support, please do activate GPU
     print("GPU is ready: {}".format(torch.cuda.is_available()))
 
-    writer = SummaryWriter()
+    config = parse_configuration()
 
-    n_way = 5
-    n_support = 5
-    n_query = 5
+    log_dir = "runs/{}/{}".format(config["tb_dir_prefix"], datetime.now().strftime("%Y_%m_%d:%H_%M_%S"))
+
+    writer = SummaryWriter(log_dir)
+
+    n_way = config["meta_train_n_way"]
+    n_support = config["meta_train_k_shot"]
+    n_query = config["meta_train_query_count"]
     sample_count = n_support + n_query
 
     (train_x, train_y), (test_x, test_y) = utility.load_datasets("../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
@@ -110,28 +150,31 @@ def basic_train_test():
     print("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
 
     model = utility.load_protonet_conv(
-        x_dim=(1, 78),
-        hid_dim=64,
-        z_dim=64,
+        x_dim=config["model_x_dim"],
+        hid_dim=config["model_hid_dim"],
+        z_dim=config["model_z_dim"],
         n_way=n_way,
         n_support=n_support,
         n_query=n_query
     )
-    # writer.add_graph(model, torch.rand(1, 1, 78).cuda())
+
     writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
     writer.flush()
 
-    max_epoch = 50
-    epoch_size = 1000
-
-    train(model, train_x, train_y, max_epoch, epoch_size, writer)
+    param_dict, metric_dict = train(model, train_x, train_y, config["meta_train_max_epoch"], config["meta_train_epoch_size"], writer)
     torch.save(model, "latest_model")
 
-    model.n_way = n_way
-    model.n_support = n_support
-    model.n_query = n_query
-    test_episode = 1000
-    test(model, test_x, test_y, test_episode, writer)
+    model.n_way = config["meta_test_n_way"]
+    model.n_support = config["meta_test_k_shot"]
+    model.n_query = config["meta_test_query_count"]
+
+    test_param_dict, test_metric_dict = test(model, test_x, test_y, config["meta_test_episode_count"], writer)
+    param_dict.update(test_param_dict)
+    metric_dict.update(test_metric_dict)
+    writer.add_hparams(param_dict, metric_dict)
+    writer.flush()
+
+    writer.close()
 
 
 if __name__ == "__main__":
