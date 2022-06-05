@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+import argparse
 import logging
 import os
 from pprint import pformat
@@ -110,26 +112,32 @@ def test(model, test_x, test_y, test_episode, writer):
 
 
 def parse_configuration():
-    # TODO::: implement config parser here!
-    config = {
-        "log_dir": "logs",
-        "experiment_dir_prefix": "prototypical",
-        "experiment_time": datetime.now().strftime("%Y_%m_%d:%H_%M_%S"),
-        "meta_train_n_way": 5,
-        "meta_train_k_shot": 5,
-        "meta_train_query_count": 5,
-        "meta_train_max_epoch": 10,
-        "meta_train_epoch_size": 1000,
-        "dataset_dir": "../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21",
-        "model_x_dim": (1, 78),
-        "model_hid_dim": 64,
-        "model_z_dim": 64,
-        "save_model_path": "latest_model",
-        "meta_test_n_way": 5,
-        "meta_test_k_shot": 5,
-        "meta_test_query_count": 5,
-        "meta_test_episode_count": 5
-    }
+    def tuple_type(strings):
+        strings = strings.replace("(", "").replace(")", "")
+        mapped_int = map(int, strings.split(","))
+        return tuple(mapped_int)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--log_dir", type=str, default="test")
+    parser.add_argument("--experiment_dir_prefix", type=str, default="prototypical")
+    parser.add_argument("--experiment_time", type=str, default=datetime.now().strftime("%Y_%m_%d:%H_%M_%S"))
+    parser.add_argument("--meta_train_n_way", type=int, default=5)
+    parser.add_argument("--meta_train_k_shot", type=int, default=5)
+    parser.add_argument("--meta_train_query_count", type=int, default=5)
+    parser.add_argument("--meta_train_max_epoch", type=int, default=10)
+    parser.add_argument("--meta_train_epoch_size", type=int, default=1000)
+    parser.add_argument("--dataset_dir", type=str, default="../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
+    parser.add_argument("--model_x_dim", type=tuple_type, default=(1, 78))
+    parser.add_argument("--model_hid_dim", type=int, default=64)
+    parser.add_argument("--model_z_dim", type=int, default=64)
+    parser.add_argument("--save_model_path", default="latest_model")
+    parser.add_argument("--meta_test_n_way", type=int, default=5)
+    parser.add_argument("--meta_test_k_shot", type=int, default=5)
+    parser.add_argument("--meta_test_query_count", type=int, default=5)
+    parser.add_argument("--meta_test_episode_count", type=int, default=5)
+
+    config = parser.parse_args()
+
     return config
 
 
@@ -137,13 +145,13 @@ def basic_train_test(config):
     # Check GPU support, please do activate GPU
     logging.info("GPU is ready: {}".format(torch.cuda.is_available()))
 
-    log_dir = "runs/{}_{}".format(config["experiment_dir_prefix"], config["experiment_time"])
+    log_dir = "runs/{}_{}".format(config.experiment_dir_prefix, config.experiment_time)
 
     writer = SummaryWriter(log_dir)
 
-    n_way = config["meta_train_n_way"]
-    n_support = config["meta_train_k_shot"]
-    n_query = config["meta_train_query_count"]
+    n_way = config.meta_train_n_way
+    n_support = config.meta_train_k_shot
+    n_query = config.meta_train_query_count
     sample_count = n_support + n_query
 
     (train_x, train_y), (test_x, test_y) = utility.load_datasets("../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
@@ -154,9 +162,9 @@ def basic_train_test(config):
     logging.info("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
 
     model = utility.load_protonet_conv(
-        x_dim=config["model_x_dim"],
-        hid_dim=config["model_hid_dim"],
-        z_dim=config["model_z_dim"],
+        x_dim=config.model_x_dim,
+        hid_dim=config.model_hid_dim,
+        z_dim=config.model_z_dim,
         n_way=n_way,
         n_support=n_support,
         n_query=n_query
@@ -166,14 +174,14 @@ def basic_train_test(config):
     writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
     writer.flush()
 
-    param_dict, metric_dict = train(model, train_x, train_y, config["meta_train_max_epoch"], config["meta_train_epoch_size"], writer)
+    param_dict, metric_dict = train(model, train_x, train_y, config.meta_train_max_epoch, config.meta_train_epoch_size, writer)
     torch.save(model, "latest_model")
 
-    model.n_way = config["meta_test_n_way"]
-    model.n_support = config["meta_test_k_shot"]
-    model.n_query = config["meta_test_query_count"]
+    model.n_way = config.meta_test_n_way
+    model.n_support = config.meta_test_k_shot
+    model.n_query = config.meta_test_query_count
 
-    test_param_dict, test_metric_dict = test(model, test_x, test_y, config["meta_test_episode_count"], writer)
+    test_param_dict, test_metric_dict = test(model, test_x, test_y, config.meta_test_episode_count, writer)
     param_dict.update(test_param_dict)
     metric_dict.update(test_metric_dict)
     writer.add_hparams(param_dict, metric_dict)
@@ -183,11 +191,11 @@ def basic_train_test(config):
 
 
 def initialize_logger(config):
-    if not os.path.exists(config["log_dir"]):
-        os.makedirs(config["log_dir"])
+    if not os.path.exists(config.log_dir):
+        os.makedirs(config.log_dir)
 
     # Setup logging
-    log_filename = "{}/run_{}_{}.log".format(config["log_dir"], config["experiment_dir_prefix"], config["experiment_time"])
+    log_filename = "{}/run_{}_{}.log".format(config.log_dir, config.experiment_dir_prefix, config.experiment_time)
 
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -196,10 +204,12 @@ def initialize_logger(config):
     )
     logging.info("Initialized logging. log_filename = {}".format(log_filename))
 
-    logging.info("Running script with following parameters\n{}".format(pformat(config)))
+    logging.info("Running script with following parameters")
+    for arg in vars(config):
+        logging.info("Parameter Name: {}    Value: {}".format(arg, getattr(config, arg)))
 
 
 if __name__ == "__main__":
-    config = parse_configuration()
-    initialize_logger(config)
-    basic_train_test(config)
+    configuration = parse_configuration()
+    initialize_logger(configuration)
+    basic_train_test(configuration)
