@@ -63,7 +63,11 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer):
 
     param_dict = {
         "lr": lr,
-        "max_epoch": max_epoch
+        "meta_train_max_epoch": max_epoch,
+        "meta_train_epoch_size": epoch_size,
+        "meta_train_n": model.n_way,
+        "meta_train_k": model.n_support,
+        "meta_train_q": model.n_query
     }
     metric_dict = {
         "meta_train/accuracy": epoch_acc,
@@ -184,6 +188,12 @@ def basic_train_test(config):
     test_param_dict, test_metric_dict = test(model, test_x, test_y, config.meta_test_episode_count, writer)
     param_dict.update(test_param_dict)
     metric_dict.update(test_metric_dict)
+
+    param_dict["model_x_dim_0"] = config.model_x_dim[0]
+    param_dict["model_x_dim_1"] = config.model_x_dim[1]
+    param_dict["model_hid_dim"] = config.model_hid_dim
+    param_dict["model_z_dim"] = config.model_z_dim
+
     writer.add_hparams(param_dict, metric_dict)
     writer.flush()
 
