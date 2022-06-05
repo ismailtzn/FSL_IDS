@@ -1,0 +1,6 @@
+*.tar
+models/
+individual_logs/
+run_experiments_logs/
+runs/
+run_experiments.log
