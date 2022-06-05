@@ -116,11 +116,6 @@ def test(model, test_x, test_y, test_episode, writer):
 
 
 def parse_configuration():
-    def tuple_type(strings):
-        strings = strings.replace("(", "").replace(")", "")
-        mapped_int = map(int, strings.split(","))
-        return tuple(mapped_int)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--log_dir", type=str, default="individual_logs")
     parser.add_argument("--experiment_dir_prefix", type=str, default="prototypical")
@@ -131,7 +126,8 @@ def parse_configuration():
     parser.add_argument("--meta_train_max_epoch", type=int, default=10)
     parser.add_argument("--meta_train_epoch_size", type=int, default=1000)
     parser.add_argument("--dataset_dir", type=str, default="../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
-    parser.add_argument("--model_x_dim", type=tuple_type, default=(1, 78))
+    parser.add_argument("--model_x_dim0", type=int, default=1)
+    parser.add_argument("--model_x_dim1", type=int, default=78)
     parser.add_argument("--model_hid_dim", type=int, default=64)
     parser.add_argument("--model_z_dim", type=int, default=64)
     parser.add_argument("--save_model_path", default="models/model_{}".format(datetime.now().strftime("%Y_%m_%d:%H_%M_%S")))
@@ -166,7 +162,7 @@ def basic_train_test(config):
     logging.info("Test Data classes: {}".format(utility.get_available_classes(test_y, sample_count)))
 
     model = utility.load_protonet_conv(
-        x_dim=config.model_x_dim,
+        x_dim=(config.model_x_dim0, config.model_x_dim1),
         hid_dim=config.model_hid_dim,
         z_dim=config.model_z_dim,
         n_way=n_way,
@@ -191,8 +187,8 @@ def basic_train_test(config):
     param_dict.update(test_param_dict)
     metric_dict.update(test_metric_dict)
 
-    param_dict["model_x_dim_0"] = config.model_x_dim[0]
-    param_dict["model_x_dim_1"] = config.model_x_dim[1]
+    param_dict["model_x_dim_0"] = config.model_x_dim0
+    param_dict["model_x_dim_1"] = config.model_x_dim1
     param_dict["model_hid_dim"] = config.model_hid_dim
     param_dict["model_z_dim"] = config.model_z_dim
 
