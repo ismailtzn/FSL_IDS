@@ -11,6 +11,7 @@ else
 fi
 
 ./clear_logs.sh
+mkdir run_experiments_logs
 
 i=0
 while IFS= read -r line
