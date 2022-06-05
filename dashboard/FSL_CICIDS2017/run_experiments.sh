@@ -17,5 +17,5 @@ while IFS= read -r line
 do
   i=$((i+1))
   echo "[$i/$lineCount] -> ./basic_train.py $line"
-  ./basic_train.py $line > "run_experiments_logs/experiment_$i.log" 2>&1 &
+  echo $line | ./basic_train.py  > "run_experiments_logs/experiment_$i.log" 2>&1
 done < "$input"
