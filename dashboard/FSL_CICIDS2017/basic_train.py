@@ -122,7 +122,7 @@ def parse_configuration():
         return tuple(mapped_int)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log_dir", type=str, default="test")
+    parser.add_argument("--log_dir", type=str, default="individual_logs")
     parser.add_argument("--experiment_dir_prefix", type=str, default="prototypical")
     parser.add_argument("--experiment_time", type=str, default=datetime.now().strftime("%Y_%m_%d:%H_%M_%S"))
     parser.add_argument("--meta_train_n_way", type=int, default=5)
