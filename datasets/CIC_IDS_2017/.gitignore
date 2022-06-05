@@ -1,5 +1,4 @@
 *.zip
 GeneratedLabelledFlows/
 MachineLearningCSV/
-cic_ids_2017_full/
-cic_ids_2017_small/
+cic_ids_2017_prepared*/
