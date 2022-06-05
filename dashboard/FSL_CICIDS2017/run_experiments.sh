@@ -6,7 +6,7 @@ if [[ $# -ge 1 ]]; then
 else
   echo Please provide text file that contains config parameters
   echo Run this script using following command
-  echo nohup ./run_experiments.sh test_parameters.txt > run_experiments.log 2>&1 &
+  echo "nohup ./run_experiments.sh test_parameters.txt > run_experiments.log 2>&1 &"
   exit
 fi
 
