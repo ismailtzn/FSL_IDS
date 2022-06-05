@@ -10,8 +10,8 @@ else
   exit
 fi
 
-rm -rf run_experiments_logs
-mkdir run_experiments_logs
+./clear_logs.sh
+
 i=0
 while IFS= read -r line
 do
@@ -19,3 +19,5 @@ do
   echo "[$i/$lineCount] -> ./basic_train.py $line"
   echo $line | ./basic_train.py  > "run_experiments_logs/experiment_$i.log" 2>&1
 done < "$input"
+
+./publish_results.sh
