@@ -134,7 +134,7 @@ def parse_configuration():
     parser.add_argument("--model_x_dim", type=tuple_type, default=(1, 78))
     parser.add_argument("--model_hid_dim", type=int, default=64)
     parser.add_argument("--model_z_dim", type=int, default=64)
-    parser.add_argument("--save_model_path", default="model_{}".format(datetime.now().strftime("%Y_%m_%d:%H_%M_%S")))
+    parser.add_argument("--save_model_path", default="models/model_{}".format(datetime.now().strftime("%Y_%m_%d:%H_%M_%S")))
     parser.add_argument("--meta_test_n_way", type=int, default=5)
     parser.add_argument("--meta_test_k_shot", type=int, default=5)
     parser.add_argument("--meta_test_query_count", type=int, default=5)
@@ -179,7 +179,9 @@ def basic_train_test(config):
     writer.flush()
 
     param_dict, metric_dict = train(model, train_x, train_y, config.meta_train_max_epoch, config.meta_train_epoch_size, writer)
-    torch.save(model, "latest_model")
+    if not os.path.exists(os.path.dirname(config.save_model_path)):
+        os.makedirs(os.path.dirname(config.save_model_path))
+    torch.save(model, config.save_model_path)
 
     model.n_way = config.meta_test_n_way
     model.n_support = config.meta_test_k_shot
