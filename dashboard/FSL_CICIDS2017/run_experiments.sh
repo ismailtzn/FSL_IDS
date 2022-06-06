@@ -6,7 +6,7 @@ if [[ $# -ge 1 ]]; then
 else
   echo Please provide text file that contains config parameters
   echo Run this script using following command
-  echo "nohup ./run_experiments.sh test_parameters.txt > run_experiments.log 2>&1 &"
+  echo "nohup ./run_experiments.sh {PARAMETERS_FILE} > run_experiments.log 2>&1 &"
   exit
 fi
 
@@ -21,4 +21,4 @@ do
   ./basic_train.py $line > "run_experiments_logs/experiment_$i.log" 2>&1
 done < "$input"
 
-./publish_results.sh
+./publish_results.sh $input
