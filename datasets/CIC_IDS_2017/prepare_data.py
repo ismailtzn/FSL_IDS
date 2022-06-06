@@ -85,8 +85,8 @@ def split_meta_datasets(all_data, params):
 
     labels = df["Label"].unique().copy()
     np.random.shuffle(labels)
-    meta_train_labels = labels[:-params["meta_train_class_count"]]
-    meta_test_labels = labels[-params["meta_train_class_count"]:]
+    meta_train_labels = labels[:-params["meta_test_class_count"]]
+    meta_test_labels = labels[-params["meta_test_class_count"]:]
     meta_train_df = df[df["Label"].isin(meta_train_labels)].copy()
     meta_test_df = df[df["Label"].isin(meta_test_labels)].copy()
 
@@ -182,11 +182,15 @@ def main(params):
 
 
 if __name__ == "__main__":
-    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "sample_per_class": 21, "meta_train_class_count": 5}
+    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "sample_per_class": 21, "meta_test_class_count": 5}
 
     if len(sys.argv) > 1 and sys.argv[1].isnumeric():
         parameters["sample_per_class"] = int(sys.argv[1])
-    parameters["output_dir"] = parameters["output_dir"] + "_" + str(parameters["sample_per_class"])
+    parameters["output_dir"] = "{}_{}-way_test_{}-shot".format(
+        parameters["output_dir"],
+        parameters["meta_test_class_count"],
+        parameters["sample_per_class"]
+    )
 
     parameters["ids2017_datasets_dir"] = "MachineLearningCSV/MachineLearningCVE"
     parameters["ids2017_files_list"] = [
