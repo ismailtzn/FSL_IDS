@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import os
 import sys
 import logging
@@ -61,12 +62,12 @@ def count_labels(label_col):
     return label_counts, label_percentages
 
 
-def initial_setup(output_dir, params):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+def initial_setup(params):
+    if not os.path.exists(params["output_dir"]):
+        os.makedirs(params["output_dir"])
 
     # Setup logging
-    log_filename = output_dir + "/" + "run_log.log"
+    log_filename = params["output_dir"] + "/" + "run_log.log"
 
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -174,34 +175,39 @@ def extract_databases():
                 zip_ref.extractall(dataset_zip_name)
 
 
-def main(params):
-    extract_databases()
-    initial_setup(params["output_dir"], params)
-    prepare_ids2017_datasets(params)
-    logging.info("Data preparation complete")
+def parse_configuration():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hdf_key", type=str, default="cic_ids_2017")
+    parser.add_argument("--output_dir_prefix", type=str, default="cic_ids_2017_prepared")
+    parser.add_argument("--sample_per_class", type=int, default=21)
+    parser.add_argument("--meta_test_class_count", type=int, default=5)
+    parser.add_argument("--ids2017_datasets_dir", type=str, default="MachineLearningCSV/MachineLearningCVE")
+
+    config = parser.parse_args()
+
+    params = {
+        "output_dir": "{}_{}-way_test_{}-shot".format(config.output_dir_prefix, config.meta_test_class_count, config.sample_per_class),
+        "ids2017_files_list": [
+            "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+            "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+            "Monday-WorkingHours.pcap_ISCX.csv",
+            "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+            "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+            "Tuesday-WorkingHours.pcap_ISCX.csv",
+            "Wednesday-workingHours.pcap_ISCX.csv"
+        ]
+    }
+
+    for arg in vars(config):
+        params[arg] = getattr(config, arg)
+
+    return params
 
 
 if __name__ == "__main__":
-    parameters = {"hdf_key": "cic_ids_2017", "output_dir": "cic_ids_2017_prepared", "sample_per_class": 21, "meta_test_class_count": 5}
-
-    if len(sys.argv) > 1 and sys.argv[1].isnumeric():
-        parameters["sample_per_class"] = int(sys.argv[1])
-    parameters["output_dir"] = "{}_{}-way_test_{}-shot".format(
-        parameters["output_dir"],
-        parameters["meta_test_class_count"],
-        parameters["sample_per_class"]
-    )
-
-    parameters["ids2017_datasets_dir"] = "MachineLearningCSV/MachineLearningCVE"
-    parameters["ids2017_files_list"] = [
-        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
-        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
-        "Friday-WorkingHours-Morning.pcap_ISCX.csv",
-        "Monday-WorkingHours.pcap_ISCX.csv",
-        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
-        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",  # Issue with flows file
-        "Tuesday-WorkingHours.pcap_ISCX.csv",
-        "Wednesday-workingHours.pcap_ISCX.csv"
-    ]
-
-    main(parameters)
+    parameters = parse_configuration()
+    extract_databases()
+    initial_setup(parameters)
+    prepare_ids2017_datasets(parameters)
+    logging.info("Data preparation complete")
