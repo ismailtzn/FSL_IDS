@@ -44,8 +44,8 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer):
             x = model.pre_process_meta_sample(meta_train_sample)
             outputs = model.forward(x)
             loss, acc_val = model.get_protonet_loss_accuracy(outputs)
-            writer.add_scalar("Meta Train Accuracy", acc_val.item(), epoch_size * epoch + episode)
-            writer.add_scalar("Meta Train Loss", loss.item(), epoch_size * epoch + episode)
+            # writer.add_scalar("Meta Train Accuracy", acc_val.item(), epoch_size * epoch + episode)
+            # writer.add_scalar("Meta Train Loss", loss.item(), epoch_size * epoch + episode)
             running_loss += loss.item()
             running_acc += acc_val
             loss.backward()
