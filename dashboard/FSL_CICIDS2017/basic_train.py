@@ -154,7 +154,7 @@ def basic_train_test(config):
     n_query = config.meta_train_query_count
     sample_count = n_support + n_query
 
-    (train_x, train_y), (test_x, test_y) = utility.load_datasets("../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
+    (train_x, train_y), (test_x, test_y) = utility.load_datasets(config.dataset_dir)
 
     logging.info("n_way: {}, n_support: {}, n_query: {}".format(n_way, n_support, n_query))
     logging.info("Shapes => train_x:{}, train_y:{}, test_x:{}, test_y:{}".format(train_x.shape, train_y.shape, test_x.shape, test_y.shape))
