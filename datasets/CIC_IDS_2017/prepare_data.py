@@ -91,8 +91,15 @@ def split_meta_datasets(all_data, params):
     meta_train_df = df[df["Label"].isin(meta_train_labels)].copy()
     meta_test_df = df[df["Label"].isin(meta_test_labels)].copy()
 
+    meta_val_df_from_train = meta_train_df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["validation_sample_per_class"])).copy()
+    meta_train_df = meta_train_df.drop(meta_val_df_from_train.index)
+    meta_val_df_from_test = meta_test_df.groupby("Label", group_keys=False).apply(lambda x: x.sample(params["validation_sample_per_class"])).copy()
+    meta_test_df = meta_test_df.drop(meta_val_df_from_test.index)
+    meta_val_df = pd.concat([meta_val_df_from_train, meta_val_df_from_test])
+
     remaining_df = all_data.drop(meta_train_df.index)  # save for later usages
     remaining_df = remaining_df.drop(meta_test_df.index)  # save for later usages
+    remaining_df = remaining_df.drop(meta_val_df.index)  # save for later usages
 
     x_meta_train = meta_train_df.loc[:, meta_train_df.columns != "Label"]
     y_meta_train = meta_train_df["Label"]
@@ -100,11 +107,15 @@ def split_meta_datasets(all_data, params):
     x_meta_test = meta_test_df.loc[:, meta_test_df.columns != "Label"]
     y_meta_test = meta_test_df["Label"]
 
+    x_meta_val = meta_val_df.loc[:, meta_val_df.columns != "Label"]
+    y_meta_val = meta_val_df["Label"]
+
     logging.info("Train set :\n{}".format(meta_train_df["Label"].value_counts()))
     logging.info("Test set :\n{}".format(meta_test_df["Label"].value_counts()))
+    logging.info("Validation set :\n{}".format(meta_val_df["Label"].value_counts()))
     logging.info("Remaining df :\n{}".format(remaining_df["Label"].value_counts()))
 
-    return x_meta_train, y_meta_train, x_meta_test, y_meta_test, remaining_df
+    return x_meta_train, y_meta_train, x_meta_test, y_meta_test, x_meta_val, y_meta_val, remaining_df
 
 
 def pre_process_dataset(params):
@@ -146,7 +157,7 @@ def pre_process_dataset(params):
 def prepare_ids2017_datasets(params):
     all_data = pre_process_dataset(params)
 
-    x_meta_train, y_meta_train, x_meta_test, y_meta_test, remaining_df = split_meta_datasets(all_data, params)
+    x_meta_train, y_meta_train, x_meta_test, y_meta_test, x_meta_val, y_meta_val, remaining_df = split_meta_datasets(all_data, params)
     # Save data files in HDF format
     logging.info("Saving prepared datasets (train, val, test) to: {}".format(params["output_dir"]))
 
@@ -156,14 +167,19 @@ def prepare_ids2017_datasets(params):
     write_to_hdf(x_meta_test, params["output_dir"] + "/" + "x_meta_test.h5", params["hdf_key"], 5)
     write_to_hdf(y_meta_test, params["output_dir"] + "/" + "y_meta_test.h5", params["hdf_key"], 5)
 
+    write_to_hdf(x_meta_val, params["output_dir"] + "/" + "x_meta_val.h5", params["hdf_key"], 5)
+    write_to_hdf(y_meta_val, params["output_dir"] + "/" + "y_meta_val.h5", params["hdf_key"], 5)
+
     write_to_hdf(remaining_df, params["output_dir"] + "/" + "remaining_df.h5", params["hdf_key"], 5)
 
     logging.info("Saving complete")
 
     logging.info("Meta train dataset shape = {}".format(x_meta_train.shape))
     logging.info("Meta test dataset shape = {}".format(x_meta_test.shape))
+    logging.info("Meta val dataset shape = {}".format(x_meta_val.shape))
     logging.info("{} Labels used int meta train = \n{}".format(len(y_meta_train.unique()), ", ".join([str(x) for x in y_meta_train.unique()])))
     logging.info("{} Labels used int meta test = \n{}".format(len(y_meta_test.unique()), ", ".join([str(x) for x in y_meta_test.unique()])))
+    logging.info("{} Labels used int meta val = \n{}".format(len(y_meta_val.unique()), ", ".join([str(x) for x in y_meta_val.unique()])))
 
 
 def extract_databases():
@@ -179,14 +195,15 @@ def parse_configuration():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hdf_key", type=str, default="cic_ids_2017")
     parser.add_argument("--output_dir_prefix", type=str, default="cic_ids_2017_prepared")
-    parser.add_argument("--sample_per_class", type=int, default=21)
-    parser.add_argument("--meta_test_class_count", type=int, default=5)
+    parser.add_argument("--sample_per_class", type=int, default=36)
+    parser.add_argument("--meta_test_class_count", type=int, default=4)
+    parser.add_argument("--validation_sample_per_class", type=int, default=10)
     parser.add_argument("--ids2017_datasets_dir", type=str, default="MachineLearningCSV/MachineLearningCVE")
 
     config = parser.parse_args()
 
     params = {
-        "output_dir": "{}_{}-way_test_{}-shot".format(config.output_dir_prefix, config.meta_test_class_count, config.sample_per_class),
+        "output_dir": "{}_{}-way_test_{}-per_label_{}-per_val".format(config.output_dir_prefix, config.meta_test_class_count, config.sample_per_class, config.validation_sample_per_class),
         "ids2017_files_list": [
             "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
             "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",

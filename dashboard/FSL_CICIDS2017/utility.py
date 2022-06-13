@@ -52,6 +52,22 @@ def load_datasets(data_dir, hdf_key="cic_ids_2017"):
     return load_train_datasets(data_dir, hdf_key), load_test_datasets(data_dir, hdf_key)
 
 
+def load_val_datasets(data_dir, hdf_key="cic_ids_2017"):
+    x_val_files = glob.glob(data_dir + "/" + "x_meta_val*")
+    y_val_files = glob.glob(data_dir + "/" + "y_meta_val*")
+
+    x_val_files.sort()
+    y_val_files.sort()
+
+    x_val_dfs = [pd.read_hdf(file, hdf_key) for file in x_val_files]
+    y_val_dfs = [pd.read_hdf(file, hdf_key) for file in y_val_files]
+
+    x_val = pd.concat(x_val_dfs)
+    y_val = pd.concat(y_val_dfs)
+
+    return x_val, y_val
+
+
 def euclidean_dist(x, y):
     """
     Computes euclidean distance btw x and y
