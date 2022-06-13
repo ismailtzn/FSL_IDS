@@ -18,7 +18,7 @@ if __name__ == '__main__':
     model_x_dim1_range = [78]
     model_hid_dim_range = range(64, 129, 64)
     model_z_dim_range = range(64, 129, 64)
-    learning_rate_range = np.arange(0.001, 0.01, 0.005)
+    learning_rate_range = [0.001]  # np.arange(0.001, 0.01, 0.005)
     learning_rate_decay_range = np.arange(0.50, 0.751, 0.25)
     meta_test_n_way_range = [4]
     meta_test_k_shot_range = [5]
