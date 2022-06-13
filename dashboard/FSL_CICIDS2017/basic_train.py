@@ -15,6 +15,58 @@ from datetime import datetime
 
 
 # noinspection DuplicatedCode
+def parse_configuration():
+    now = datetime.now().strftime("%Y_%m_%d:%H_%M_%S")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--log_dir", type=str, default="individual_logs")
+    parser.add_argument("--experiment_dir_prefix", type=str, default="prototypical")
+    parser.add_argument("--experiment_time", type=str, default=now)
+    parser.add_argument("--meta_train_n_way", type=int, default=5)
+    parser.add_argument("--meta_train_k_shot", type=int, default=5)
+    parser.add_argument("--meta_train_query_count", type=int, default=5)
+    parser.add_argument("--meta_train_max_epoch", type=int, default=10)
+    parser.add_argument("--meta_train_epoch_size", type=int, default=1000)
+    parser.add_argument("--dataset_dir", type=str, default="../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
+    parser.add_argument("--model_x_dim0", type=int, default=1)
+    parser.add_argument("--model_x_dim1", type=int, default=78)
+    parser.add_argument("--model_hid_dim", type=int, default=64)
+    parser.add_argument("--model_z_dim", type=int, default=64)
+    parser.add_argument("--learning_rate", type=float, default=0.001)
+    parser.add_argument("--learning_rate_decay", type=float, default=0.75)
+    parser.add_argument("--save_model_path", default="models/model_{}".format(now))
+    parser.add_argument("--save_history_path", default="history/history_{}.pkl".format(now))
+    parser.add_argument("--meta_test_n_way", type=int, default=5)
+    parser.add_argument("--meta_test_k_shot", type=int, default=5)
+    parser.add_argument("--meta_test_query_count", type=int, default=5)
+    parser.add_argument("--meta_test_episode_count", type=int, default=5)
+
+    config = parser.parse_args()
+
+    return config
+
+
+# noinspection DuplicatedCode
+def initialize_logger(config):
+    if not os.path.exists(config.log_dir):
+        os.makedirs(config.log_dir)
+
+    # Setup logging
+    log_filename = "{}/run_{}_{}.log".format(config.log_dir, config.experiment_dir_prefix, config.experiment_time)
+
+    logging.basicConfig(
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[logging.FileHandler(log_filename, "w+"), logging.StreamHandler()],
+        level=logging.INFO
+    )
+    logging.info("Initialized logging. log_filename = {}".format(log_filename))
+
+    logging.info("Running script with following parameters")
+    for arg in vars(config):
+        logging.info("Parameter Name: {}    Value: {}".format(arg, getattr(config, arg)))
+
+
+# noinspection DuplicatedCode
 def train(model, train_x, train_y, max_epoch, epoch_size, writer, learning_rate=0.001, learning_rate_decay=0.75):
     """
     Trains the protonet
@@ -120,36 +172,78 @@ def test(model, test_x, test_y, test_episode, writer):
     return param_dict, metric_dict, history
 
 
-# noinspection DuplicatedCode
-def parse_configuration():
-    now = datetime.now().strftime("%Y_%m_%d:%H_%M_%S")
+def validate(model, x_val, y_val, config, writer):
+    model.eval()
+    sample_size = x_val.shape[0]
+    model.n_way = len(y_val.unique())
+    model.n_support = config.meta_test_k_shot
+    model.n_query = int((sample_size / model.n_way) - model.n_support)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--log_dir", type=str, default="individual_logs")
-    parser.add_argument("--experiment_dir_prefix", type=str, default="prototypical")
-    parser.add_argument("--experiment_time", type=str, default=now)
-    parser.add_argument("--meta_train_n_way", type=int, default=5)
-    parser.add_argument("--meta_train_k_shot", type=int, default=5)
-    parser.add_argument("--meta_train_query_count", type=int, default=5)
-    parser.add_argument("--meta_train_max_epoch", type=int, default=10)
-    parser.add_argument("--meta_train_epoch_size", type=int, default=1000)
-    parser.add_argument("--dataset_dir", type=str, default="../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_21")
-    parser.add_argument("--model_x_dim0", type=int, default=1)
-    parser.add_argument("--model_x_dim1", type=int, default=78)
-    parser.add_argument("--model_hid_dim", type=int, default=64)
-    parser.add_argument("--model_z_dim", type=int, default=64)
-    parser.add_argument("--learning_rate", type=float, default=0.001)
-    parser.add_argument("--learning_rate_decay", type=float, default=0.75)
-    parser.add_argument("--save_model_path", default="models/model_{}".format(now))
-    parser.add_argument("--save_history_path", default="history/history_{}.pkl".format(now))
-    parser.add_argument("--meta_test_n_way", type=int, default=5)
-    parser.add_argument("--meta_test_k_shot", type=int, default=5)
-    parser.add_argument("--meta_test_query_count", type=int, default=5)
-    parser.add_argument("--meta_test_episode_count", type=int, default=5)
+    (support_set, s_true_labels), (query_set, q_true_labels), class_labels = utility.extract_sample(model.n_way, model.n_support, model.n_query, x_val, y_val)
+    outputs = model.forward(query_set, support_set=support_set)
+    loss, metrics, cf_matrix = model.get_protonet_loss_metrics(outputs, q_true_labels, class_labels=class_labels)
+    writer.add_scalar("Meta Validation Accuracy", metrics["accuracy"])
+    writer.add_scalar("Meta Validation Loss", metrics["loss"])
+    logging.info("\rValidation results -- Loss: {:.4f} Acc: {:.4f}".format(metrics["loss"], metrics["accuracy"]))
 
-    config = parser.parse_args()
+    param_dict = {
+        "meta_val_n": model.n_way,
+        "meta_val_k": model.n_support,
+        "meta_val_q": model.n_query
+    }
+    metric_dict = {
+        "MetaValidation/accuracy": metrics["accuracy"],
+        "MetaValidation/loss": metrics["loss"],
+    }
+    history = {"metrics": [metrics], "cf_matrix": [cf_matrix], "class_labels": [class_labels]}
 
-    return config
+    return param_dict, metric_dict, history
+
+
+def log_history(config, history, writer, history_type="Test"):
+    # Save history
+    save_history_path = "{}_{}".format(config.save_history_path, history_type)
+    if not os.path.exists(os.path.dirname(save_history_path)):
+        os.makedirs(os.path.dirname(save_history_path))
+
+    with open(save_history_path, "wb") as f:
+        pickle.dump(history, f)
+        logging.info("Writing {} history object to file {}, pickle version {}".format(
+            history_type,
+            save_history_path,
+            pickle.format_version
+        ))
+
+        # To load use following
+        # with open(save_history_path, "rb") as f:
+        #     loaded_dict = pickle.load(f)
+
+    avg_history = utility.average_history(history)
+
+    logging.info("{} Metrics \n{}".format(history_type, utility.tabulate_metrics(avg_history["metrics"], "github")))
+    logging.info("{} Average Confusion Matrix \n{}".format(
+        history_type,
+        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], "github", history["class_labels"][-1].tolist()))
+    )
+    logging.info("{} Sum Confusion Matrix \n{}".format(
+        history_type,
+        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], "github", history["class_labels"][-1].tolist()))
+    )
+
+    writer.add_text("{} Average History".format(history_type), utility.tabulate_metrics(avg_history["metrics"]))
+    writer.flush()
+
+    writer.add_text(
+        "{} Average Confusion Matrix".format(history_type),
+        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], showindex=history["class_labels"][-1].tolist())
+    )
+    writer.flush()
+
+    writer.add_text(
+        "{} Sum Confusion Matrix".format(history_type),
+        utility.tabulate_cf_matrix(avg_history["sum_cf_matrix"], showindex=history["class_labels"][-1].tolist())
+    )
+    writer.flush()
 
 
 # noinspection DuplicatedCode
@@ -181,7 +275,6 @@ def basic_train_test(config):
         n_support=n_support,
         n_query=n_query
     )
-
     logging.info(model.encoder)
     writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
     writer.flush()
@@ -197,6 +290,7 @@ def basic_train_test(config):
         learning_rate_decay=config.learning_rate_decay
     )
 
+    # Save model
     if not os.path.exists(os.path.dirname(config.save_model_path)):
         os.makedirs(os.path.dirname(config.save_model_path))
     torch.save(model, config.save_model_path)
@@ -204,8 +298,7 @@ def basic_train_test(config):
     model.n_way = config.meta_test_n_way
     model.n_support = config.meta_test_k_shot
     model.n_query = config.meta_test_query_count
-
-    test_param_dict, test_metric_dict, history = test(
+    test_param_dict, test_metric_dict, test_history = test(
         model,
         test_x,
         test_y,
@@ -216,74 +309,27 @@ def basic_train_test(config):
     param_dict.update(test_param_dict)
     metric_dict.update(test_metric_dict)
 
-    if not os.path.exists(os.path.dirname(config.save_history_path)):
-        os.makedirs(os.path.dirname(config.save_history_path))
-    torch.save(model, config.save_history_path)
+    log_history(config, test_history, writer, "Test")
 
-    with open(config.save_history_path, "wb") as f:
-        pickle.dump(history, f)
-        logging.info("Writing history object to file {}, pickle version {}".format(
-            config.save_history_path,
-            pickle.format_version
-        ))
-
-    # To load use following
-    # with open(config.save_history_path, "rb") as f:
-    #     loaded_dict = pickle.load(f)
-
-    avg_history = utility.average_history(history)
-
-    logging.info("Metrics \n{}".format(utility.tabulate_metrics(avg_history["metrics"], "github")))
-    logging.info("Average Confusion Matrix \n{}".format(
-        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], "github", history["class_labels"][-1].tolist()))
+    x_val, y_val = utility.load_val_datasets(config.dataset_dir)
+    val_param_dict, val_metric_dict, val_history = validate(
+        model,
+        x_val,
+        y_val,
+        config,
+        writer
     )
-    logging.info("Sum Confusion Matrix \n{}".format(
-        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], "github", history["class_labels"][-1].tolist()))
-    )
+    param_dict.update(val_param_dict)
+    metric_dict.update(val_metric_dict)
+    log_history(config, val_history, writer, "Validation")
+
     param_dict["model_x_dim_0"] = config.model_x_dim0
     param_dict["model_x_dim_1"] = config.model_x_dim1
     param_dict["model_hid_dim"] = config.model_hid_dim
     param_dict["model_z_dim"] = config.model_z_dim
-
     writer.add_hparams(param_dict, metric_dict)
     writer.flush()
-
-    writer.add_text("Average History", utility.tabulate_metrics(avg_history["metrics"]))
-    writer.flush()
-
-    writer.add_text(
-        "Average Confusion Matrix",
-        utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], showindex=history["class_labels"][-1].tolist())
-    )
-    writer.flush()
-
-    writer.add_text(
-        "Sum Confusion Matrix",
-        utility.tabulate_cf_matrix(avg_history["sum_cf_matrix"], showindex=history["class_labels"][-1].tolist())
-    )
-    writer.flush()
-
     writer.close()
-
-
-# noinspection DuplicatedCode
-def initialize_logger(config):
-    if not os.path.exists(config.log_dir):
-        os.makedirs(config.log_dir)
-
-    # Setup logging
-    log_filename = "{}/run_{}_{}.log".format(config.log_dir, config.experiment_dir_prefix, config.experiment_time)
-
-    logging.basicConfig(
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[logging.FileHandler(log_filename, "w+"), logging.StreamHandler()],
-        level=logging.INFO
-    )
-    logging.info("Initialized logging. log_filename = {}".format(log_filename))
-
-    logging.info("Running script with following parameters")
-    for arg in vars(config):
-        logging.info("Parameter Name: {}    Value: {}".format(arg, getattr(config, arg)))
 
 
 if __name__ == "__main__":
