@@ -1,3 +1,6 @@
+import copy
+import numbers
+
 import numpy as np
 import pandas as pd
 import glob
@@ -7,6 +10,7 @@ import torch.nn.functional
 import ProtoNet
 from torch.utils.tensorboard.summary import hparams
 from torch.utils.tensorboard import SummaryWriter
+from tabulate import tabulate
 
 
 def load_train_datasets(data_dir, hdf_key="cic_ids_2017"):
@@ -76,7 +80,6 @@ def get_available_classes(data_y, sample_count):
     return available_classes
 
 
-# Create samples
 def extract_sample(n_way, n_support, n_query, data_x, data_y):
     """
     Picks random sample of size n_support+n_query, for n_way classes
@@ -88,21 +91,45 @@ def extract_sample(n_way, n_support, n_query, data_x, data_y):
         data_y (np.array): dataset of labels
     Returns:
           (torch.Tensor): sample. Size (n_way, n_support+n_query, (dim))
+          (list): True label indexes
+          (list): Used class names.
     """
-    sample = []
+    support_set = []
+    s_true_labels = []
+    query_set = []
+    q_true_labels = []
     available_classes = get_available_classes(data_y, (n_support + n_query))
 
-    random_classes = np.random.choice(available_classes, n_way, replace=False)
-    for cls in random_classes:
+    class_labels = np.random.choice(available_classes, n_way, replace=False)
+    class_labels.sort()
+
+    for i, cls in enumerate(class_labels):
         datax_cls = data_x[data_y == cls]
         perm = np.random.permutation(datax_cls)
-        sample_cls = perm[:(n_support + n_query)]
-        sample.append(sample_cls)
-    sample = np.array(sample)
-    sample = torch.from_numpy(sample).float()
-    sample = sample.view(n_way, (n_support + n_query), 1, 78)
 
-    return sample
+        support_set.append(perm[:n_support])
+        s_true_labels.extend([i] * n_support)
+        query_set.append(perm[n_support:n_support + n_query])
+        q_true_labels.extend([i] * n_query)
+
+    support_set = np.array(support_set)
+    support_set = torch.from_numpy(support_set).float()
+    support_set = support_set.view(n_way, n_support, 1, 78)
+    support_set = support_set.cuda()
+    s_true_labels = torch.Tensor(s_true_labels).cuda()
+    s_true_labels = s_true_labels.view(n_way, n_support, 1).long()
+    s_true_labels.requires_grad_(False)
+
+    query_set = np.array(query_set)
+    query_set = torch.from_numpy(query_set).float()
+    query_set = query_set.view(n_way, n_query, 1, 78)
+    query_set = query_set.cuda()
+
+    q_true_labels = torch.Tensor(q_true_labels).cuda()
+    q_true_labels = q_true_labels.view(n_way, n_query, 1).long()
+    q_true_labels.requires_grad_(False)
+
+    return (support_set, s_true_labels), (query_set, q_true_labels), class_labels
 
 
 def load_protonet_conv(**kwargs):
@@ -139,6 +166,77 @@ def load_protonet_conv(**kwargs):
     )
 
     return ProtoNet.ProtoNet(encoder, n_way, n_support, n_query)
+
+
+def sum_dicts(x, y):
+    result = {}
+    if x.keys() != y.keys():
+        raise ValueError("x and y should be in same dict format")
+    for key in x.keys():
+        if isinstance(x[key], numbers.Number) and isinstance(y[key], numbers.Number):
+            result[key] = x[key] + y[key]
+        elif isinstance(x[key], dict) and isinstance(y[key], dict):
+            result[key] = sum_dicts(x[key], y[key])
+        else:
+            raise ValueError("x[key] and y[key] should be in same dict format")
+    return result
+
+
+def multiply_dict_with_number(d, n):
+    result = {}
+
+    for key in d.keys():
+        if isinstance(d[key], numbers.Number):
+            result[key] = d[key] * n
+        elif isinstance(d[key], dict):
+            result[key] = multiply_dict_with_number(d[key], n)
+        else:
+            raise ValueError("d[key] should be number")
+    return result
+
+
+def average_history(history):
+    avg_metrics = None
+
+    for item in history["metrics"]:
+        if avg_metrics is None:
+            avg_metrics = copy.deepcopy(item)
+            continue
+
+        avg_metrics = sum_dicts(avg_metrics, item)
+    avg_metrics = multiply_dict_with_number(avg_metrics, (1 / len(history["metrics"])))
+
+    avg_hist = {
+        "metrics": avg_metrics,
+        "avg_cf_matrix": np.around(np.average([x for x in history["cf_matrix"]], axis=0), decimals=3),
+        "sum_cf_matrix": sum(history["cf_matrix"])
+    }
+
+    return avg_hist
+
+
+def tabulate_metrics(metrics, tablefmt="html"):
+    table = []
+    header = ["F1-Score", "Precision", "Recall"]
+
+    non_class_keys = ["macro avg", "weighted avg", "accuracy", "loss"]
+    for key, value in metrics.items():
+        if key not in non_class_keys:
+            table.append([key, value["f1-score"], value["precision"], value["recall"]])
+
+    table.append(["", "", "", ""])
+    table.append(["*MACRO AVG*", metrics["macro avg"]["f1-score"], metrics["macro avg"]["precision"], metrics["macro avg"]["recall"]])
+    table.append(["*WEIGHTED AVG*", metrics["weighted avg"]["f1-score"], metrics["weighted avg"]["precision"], metrics["weighted avg"]["recall"]])
+
+    return tabulate(table, headers=header, tablefmt=tablefmt)
+
+
+def tabulate_cf_matrix(cf_table, tablefmt="html", showindex="always"):
+    if isinstance(showindex, str):
+        header = range(cf_table.shape[1])
+    else:
+        header = showindex
+    return tabulate(cf_table, tablefmt=tablefmt, showindex=showindex, headers=header)
 
 
 def add_hparams(writer, param_dict, metrics_dict):

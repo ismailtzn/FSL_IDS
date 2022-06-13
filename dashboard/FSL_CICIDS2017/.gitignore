@@ -1,4 +1,5 @@
 *.tar
+history/
 models/
 individual_logs/
 run_experiments_logs/
