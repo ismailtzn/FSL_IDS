@@ -40,6 +40,7 @@ def parse_configuration():
     parser.add_argument("--meta_test_k_shot", type=int, default=5)
     parser.add_argument("--meta_test_query_count", type=int, default=5)
     parser.add_argument("--meta_test_episode_count", type=int, default=5)
+    parser.add_argument("--experiment_id", type=str, default=now)
 
     config = parser.parse_args()
 
@@ -67,31 +68,31 @@ def initialize_logger(config):
 
 
 # noinspection DuplicatedCode
-def train(model, train_x, train_y, max_epoch, epoch_size, writer, learning_rate=0.001, learning_rate_decay=0.75):
+def train(model, train_x, train_y, config, writer):
     """
     Trains the protonet
     Args:
         model: protonet model
         train_x (np.array): training set
         train_y(np.array): labels of training set
-        max_epoch (int): max epochs to train on
-        epoch_size (int): episodes per epoch
+        config:
         writer (SummaryWriter): writer instance for tensorflow
-        learning_rate:
-        learning_rate_decay:
     """
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=learning_rate_decay, last_epoch=-1)
+    optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=config.learning_rate_decay, last_epoch=-1)
 
     epoch = 0  # epochs done so far
     epoch_acc = 0
     epoch_loss = 0
 
-    while epoch < max_epoch:
+    early_stop_acc_threshold = 0.99
+    early_stop_counter = 3
+
+    while epoch < config.meta_train_max_epoch:
         running_loss = 0.0
         running_acc = 0.0
 
-        for episode in tqdm(range(epoch_size), desc="Epoch {:d} train".format(epoch + 1)):
+        for episode in tqdm(range(config.meta_train_epoch_size), desc="Epoch {:d} train".format(epoch + 1)):
             (support_set, s_true_labels), (query_set, q_true_labels), class_labels = utility.extract_sample(model.n_way, model.n_support, model.n_query, train_x, train_y)
             optimizer.zero_grad()
             outputs = model.forward(query_set, support_set=support_set)
@@ -101,42 +102,51 @@ def train(model, train_x, train_y, max_epoch, epoch_size, writer, learning_rate=
             loss.backward()
             optimizer.step()
 
-        epoch_loss = running_loss / epoch_size
-        epoch_acc = running_acc / epoch_size
+        epoch_loss = running_loss / config.meta_train_epoch_size
+        epoch_acc = running_acc / config.meta_train_epoch_size
         logging.info("Epoch {:d} -- Loss: {:.4f} Acc: {:.4f}".format(epoch + 1, epoch_loss, epoch_acc))
-        writer.add_scalar("Meta Train Accuracy/Epochs", epoch_acc, epoch)
-        writer.add_scalar("Meta Train Loss/Epochs", epoch_loss, epoch)
+        writer.add_scalar("MetaTrain/Accuracy", epoch_acc, epoch)
+        writer.add_scalar("MetaTrain/Loss", epoch_loss, epoch)
         writer.flush()
 
         epoch += 1
         scheduler.step()
 
+        if epoch_acc > early_stop_acc_threshold:
+            early_stop_counter -= 1
+            if early_stop_counter == 0:
+                logging.info("Early stopping since training accuracy is over threshold({}) at least {} consecutive times.".format(early_stop_acc_threshold, early_stop_counter))
+                break
+        else:
+            early_stop_counter = 3
+
     param_dict = {
-        "learning_rate": learning_rate,
-        "learning_rate_decay": learning_rate_decay,
-        "meta_train_max_epoch": max_epoch,
-        "meta_train_epoch_size": epoch_size,
-        "meta_train_n": model.n_way,
-        "meta_train_k": model.n_support,
-        "meta_train_q": model.n_query
+        "MetaTrain/learning_rate": config.learning_rate,
+        "MetaTrain/learning_rate_decay": config.learning_rate_decay,
+        "MetaTrain/max_epoch": config.meta_train_max_epoch,
+        "MetaTrain/epoch_size": config.meta_train_epoch_size,
+        "MetaTrain/early_stop_counter": early_stop_counter,
+        "MetaTrain/n": model.n_way,
+        "MetaTrain/k": model.n_support,
+        "MetaTrain/q": model.n_query
     }
     metric_dict = {
-        "MetaTrain/accuracy": epoch_acc,
-        "MetaTrain/loss": epoch_loss,
+        "MetaTrain/total_accuracy": epoch_acc,
+        "MetaTrain/total_loss": epoch_loss,
     }
 
     return param_dict, metric_dict
 
 
 # noinspection DuplicatedCode
-def test(model, test_x, test_y, test_episode, writer):
+def test(model, test_x, test_y, config, writer):
     """
     Tests the protonet
     Args:
         model: trained model
         test_x (np.array): testing set
         test_y (np.array): labels of testing set
-        test_episode (int): number of episodes to test on
+        config:
         writer (SummaryWriter): writer instance for tensorflow
     """
 
@@ -144,30 +154,38 @@ def test(model, test_x, test_y, test_episode, writer):
     running_loss = 0.0
     running_acc = 0.0
     history = {"metrics": [], "cf_matrix": [], "class_labels": []}
-    for episode in tqdm(range(test_episode)):
+    for episode in tqdm(range(config.meta_test_episode_count)):
         (support_set, s_true_labels), (query_set, q_true_labels), class_labels = utility.extract_sample(model.n_way, model.n_support, model.n_query, test_x, test_y)
         outputs = model.forward(query_set, support_set=support_set)
         loss, metrics, cf_matrix = model.get_protonet_loss_metrics(outputs, q_true_labels, class_labels=class_labels)
-        writer.add_scalar("Meta Test Accuracy", metrics["accuracy"], episode)
-        writer.add_scalar("Meta Test Loss", metrics["loss"], episode)
+        writer.add_scalar("MetaTest/Accuracy", metrics["accuracy"], episode)
+        writer.add_scalar("MetaTest/Loss", metrics["loss"], episode)
         running_loss += metrics["loss"]
         running_acc += metrics["accuracy"]
         history["metrics"].append(metrics)
         history["cf_matrix"].append(cf_matrix)
         history["class_labels"].append(class_labels)
-    avg_loss = running_loss / test_episode
-    avg_acc = running_acc / test_episode
+    avg_loss = running_loss / config.meta_test_episode_count
+    avg_acc = running_acc / config.meta_test_episode_count
     logging.info("\rTest results -- Loss: {:.4f} Acc: {:.4f}".format(avg_loss, avg_acc))
 
+    avg_history = utility.average_history(history)
+
     param_dict = {
-        "meta_episode": test_episode,
-        "meta_test_n": model.n_way,
-        "meta_test_k": model.n_support,
-        "meta_test_q": model.n_query
+        "MetaTest/episode": config.meta_test_episode_count,
+        "MetaTest/n": model.n_way,
+        "MetaTest/k": model.n_support,
+        "MetaTest/q": model.n_query
     }
     metric_dict = {
-        "MetaTest/accuracy": avg_acc,
-        "MetaTest/loss": avg_loss,
+        "MetaTest/AvgAccuracy": avg_acc,
+        "MetaTest/AvgLoss": avg_loss,
+        "MetaTest/f1-score_macro_avg": avg_history["metrics"]["macro avg"]["f1-score"],
+        "MetaTest/f1-score_weighted_avg": avg_history["metrics"]["weighted avg"]["f1-score"],
+        "MetaTest/precision_macro_avg": avg_history["metrics"]["macro avg"]["precision"],
+        "MetaTest/precision_weighted_avg": avg_history["metrics"]["weighted avg"]["precision"],
+        "MetaTest/recall_macro_avg": avg_history["metrics"]["macro avg"]["recall"],
+        "MetaTest/recall_weighted_avg": avg_history["metrics"]["weighted avg"]["recall"]
     }
     return param_dict, metric_dict, history
 
@@ -182,18 +200,24 @@ def validate(model, x_val, y_val, config, writer):
     (support_set, s_true_labels), (query_set, q_true_labels), class_labels = utility.extract_sample(model.n_way, model.n_support, model.n_query, x_val, y_val)
     outputs = model.forward(query_set, support_set=support_set)
     loss, metrics, cf_matrix = model.get_protonet_loss_metrics(outputs, q_true_labels, class_labels=class_labels)
-    writer.add_scalar("Meta Validation Accuracy", metrics["accuracy"])
-    writer.add_scalar("Meta Validation Loss", metrics["loss"])
+    writer.add_scalar("MetaValidation/Accuracy", metrics["accuracy"])
+    writer.add_scalar("MetaValidation/Loss", metrics["loss"])
     logging.info("\rValidation results -- Loss: {:.4f} Acc: {:.4f}".format(metrics["loss"], metrics["accuracy"]))
 
     param_dict = {
-        "meta_val_n": model.n_way,
-        "meta_val_k": model.n_support,
-        "meta_val_q": model.n_query
+        "MetaValidation/n": model.n_way,
+        "MetaValidation/k": model.n_support,
+        "MetaValidation/q": model.n_query
     }
     metric_dict = {
         "MetaValidation/accuracy": metrics["accuracy"],
         "MetaValidation/loss": metrics["loss"],
+        "MetaValidation/f1-score_macro_avg": metrics["macro avg"]["f1-score"],
+        "MetaValidation/f1-score_weighted_avg": metrics["weighted avg"]["f1-score"],
+        "MetaValidation/precision_macro_avg": metrics["macro avg"]["precision"],
+        "MetaValidation/precision_weighted_avg": metrics["weighted avg"]["precision"],
+        "MetaValidation/recall_macro_avg": metrics["macro avg"]["recall"],
+        "MetaValidation/recall_weighted_avg": metrics["weighted avg"]["recall"]
     }
     history = {"metrics": [metrics], "cf_matrix": [cf_matrix], "class_labels": [class_labels]}
 
@@ -230,17 +254,17 @@ def log_history(config, history, writer, history_type="Test"):
         utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], "github", history["class_labels"][-1].tolist()))
     )
 
-    writer.add_text("{} Average History".format(history_type), utility.tabulate_metrics(avg_history["metrics"]))
+    writer.add_text("{}/Average History".format(history_type), utility.tabulate_metrics(avg_history["metrics"]))
     writer.flush()
 
     writer.add_text(
-        "{} Average Confusion Matrix".format(history_type),
+        "{}/Average Confusion Matrix".format(history_type),
         utility.tabulate_cf_matrix(avg_history["avg_cf_matrix"], showindex=history["class_labels"][-1].tolist())
     )
     writer.flush()
 
     writer.add_text(
-        "{} Sum Confusion Matrix".format(history_type),
+        "{}/Sum Confusion Matrix".format(history_type),
         utility.tabulate_cf_matrix(avg_history["sum_cf_matrix"], showindex=history["class_labels"][-1].tolist())
     )
     writer.flush()
@@ -283,11 +307,8 @@ def basic_train_test(config):
         model,
         train_x,
         train_y,
-        config.meta_train_max_epoch,
-        config.meta_train_epoch_size,
-        writer,
-        learning_rate=config.learning_rate,
-        learning_rate_decay=config.learning_rate_decay
+        config,
+        writer
     )
 
     # Save model
@@ -302,7 +323,7 @@ def basic_train_test(config):
         model,
         test_x,
         test_y,
-        config.meta_test_episode_count,
+        config,
         writer
     )
 
@@ -327,6 +348,8 @@ def basic_train_test(config):
     param_dict["model_x_dim_1"] = config.model_x_dim1
     param_dict["model_hid_dim"] = config.model_hid_dim
     param_dict["model_z_dim"] = config.model_z_dim
+    param_dict["experiment_id"] = config.experiment_id
+
     writer.add_hparams(param_dict, metric_dict)
     writer.flush()
     writer.close()
