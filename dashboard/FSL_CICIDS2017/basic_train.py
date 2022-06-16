@@ -6,8 +6,9 @@ import pickle
 import torch
 import torch.nn.functional
 import torch.optim as optim
-
+import csv
 import utility
+import numpy as np
 from tqdm import tqdm
 
 from torch.utils.tensorboard import SummaryWriter
@@ -35,12 +36,14 @@ def parse_configuration():
     parser.add_argument("--learning_rate", type=float, default=0.001)
     parser.add_argument("--learning_rate_decay", type=float, default=0.75)
     parser.add_argument("--save_model_path", default="models/model_{}".format(now))
-    parser.add_argument("--save_history_path", default="history/history_{}.pkl".format(now))
+    parser.add_argument("--save_history_path", default="history/history_{}".format(now))
     parser.add_argument("--meta_test_n_way", type=int, default=5)
     parser.add_argument("--meta_test_k_shot", type=int, default=5)
     parser.add_argument("--meta_test_query_count", type=int, default=5)
     parser.add_argument("--meta_test_episode_count", type=int, default=5)
     parser.add_argument("--experiment_id", type=str, default=now)
+    parser.add_argument("--early_stop_change_acc_threshold", type=float, default=0.0002)
+    parser.add_argument("--early_stop_acc_window_length", type=int, default=5)
 
     config = parser.parse_args()
 
@@ -85,10 +88,11 @@ def train(model, train_x, train_y, config, writer):
     epoch_acc = 0
     epoch_loss = 0
 
-    early_stop_acc_threshold = 0.99
-    early_stop_counter = 3
+    early_stop_acc_window = []
+    history = {"metrics": [], "cf_matrix": [], "class_labels": []}
+    early_stop = False
 
-    while epoch < config.meta_train_max_epoch:
+    while epoch < config.meta_train_max_epoch and not early_stop:
         running_loss = 0.0
         running_acc = 0.0
 
@@ -99,6 +103,9 @@ def train(model, train_x, train_y, config, writer):
             loss, metrics, cf_matrix = model.get_protonet_loss_metrics(outputs, q_true_labels, class_labels=class_labels)
             running_loss += metrics["loss"]
             running_acc += metrics["accuracy"]
+            history["metrics"].append(metrics)
+            history["cf_matrix"].append(cf_matrix)
+            history["class_labels"].append(class_labels)
             loss.backward()
             optimizer.step()
 
@@ -112,20 +119,21 @@ def train(model, train_x, train_y, config, writer):
         epoch += 1
         scheduler.step()
 
-        if epoch_acc > early_stop_acc_threshold:
-            early_stop_counter -= 1
-            if early_stop_counter == 0:
-                logging.info("Early stopping since training accuracy is over threshold({}) at least {} consecutive times.".format(early_stop_acc_threshold, early_stop_counter))
-                break
-        else:
-            early_stop_counter = 3
+        early_stop_acc_window.append(epoch_acc)
+        if len(early_stop_acc_window) > config.early_stop_acc_window_length:
+            early_stop_acc_window.pop(0)
+            change_mean = np.abs([early_stop_acc_window[i] - early_stop_acc_window[i - 1] for i in range(1, len(early_stop_acc_window))]).mean()
+            logging.info("Epoch {:d} -- change_mean {:.10f}".format(epoch, change_mean))
+            if epoch_acc > 0.995 or change_mean < config.early_stop_change_acc_threshold:
+                logging.info("Early stopping")
+                early_stop = True
 
     param_dict = {
         "MetaTrain/learning_rate": config.learning_rate,
         "MetaTrain/learning_rate_decay": config.learning_rate_decay,
         "MetaTrain/max_epoch": config.meta_train_max_epoch,
         "MetaTrain/epoch_size": config.meta_train_epoch_size,
-        "MetaTrain/early_stop_counter": early_stop_counter,
+        "MetaTrain/early_stop": early_stop,
         "MetaTrain/n": model.n_way,
         "MetaTrain/k": model.n_support,
         "MetaTrain/q": model.n_query
@@ -135,7 +143,7 @@ def train(model, train_x, train_y, config, writer):
         "MetaTrain/total_loss": epoch_loss,
     }
 
-    return param_dict, metric_dict
+    return param_dict, metric_dict, history
 
 
 # noinspection DuplicatedCode
@@ -224,9 +232,33 @@ def validate(model, x_val, y_val, config, writer):
     return param_dict, metric_dict, history
 
 
+def log_experiment_params(config, experiment_params):
+    # Save history
+    save_experiment_params_path = "{}_experiment_params.pkl".format(config.save_history_path)
+    if not os.path.exists(os.path.dirname(save_experiment_params_path)):
+        os.makedirs(os.path.dirname(save_experiment_params_path))
+
+    with open(save_experiment_params_path, "wb") as f:
+        pickle.dump(save_experiment_params_path, f)
+        logging.info("Writing experiment_params object to file {}, pickle version {}".format(
+            save_experiment_params_path,
+            pickle.format_version
+        ))
+
+    fieldnames = [key for key in experiment_params.keys()]
+    fieldnames.remove("experiment_id")
+    fieldnames.insert(0, "experiment_id")
+
+    save_experiment_params_csv_path = "{}_experiment_params.csv".format(config.save_history_path)
+    with open(save_experiment_params_csv_path, "w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
+        writer.writerow(experiment_params)
+
+
 def log_history(config, history, writer, history_type="Test"):
     # Save history
-    save_history_path = "{}_{}".format(config.save_history_path, history_type)
+    save_history_path = "{}_{}.pkl".format(config.save_history_path, history_type)
     if not os.path.exists(os.path.dirname(save_history_path)):
         os.makedirs(os.path.dirname(save_history_path))
 
@@ -303,7 +335,7 @@ def basic_train_test(config):
     writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
     writer.flush()
 
-    param_dict, metric_dict = train(
+    param_dict, metric_dict, train_history = train(
         model,
         train_x,
         train_y,
@@ -311,10 +343,12 @@ def basic_train_test(config):
         writer
     )
 
-    # Save model
+    # Save modelule tells us that the standard deviation of a sample is approximately equal to one-
     if not os.path.exists(os.path.dirname(config.save_model_path)):
         os.makedirs(os.path.dirname(config.save_model_path))
     torch.save(model, config.save_model_path)
+
+    log_history(config, train_history, writer, "Train")
 
     model.n_way = config.meta_test_n_way
     model.n_support = config.meta_test_k_shot
@@ -352,6 +386,9 @@ def basic_train_test(config):
 
     writer.add_hparams(param_dict, metric_dict)
     writer.flush()
+
+    log_experiment_params(config, {**param_dict, **metric_dict})
+
     writer.close()
 
 
