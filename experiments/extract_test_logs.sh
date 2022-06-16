@@ -10,7 +10,7 @@ done
 mkdir merged/runs
 for i in merged/experiment_*
 do
-  cp $i/runs/* merged/runs
+  cp -rf $i/runs/* merged/runs
 done
 
 mkdir merged/csvs
