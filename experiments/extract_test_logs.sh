@@ -10,13 +10,13 @@ done
 mkdir merged/runs
 for i in merged/experiment_*
 do
-  mv $i/runs/* merged/runs
+  cp $i/runs/* merged/runs
 done
 
 mkdir merged/csvs
 for i in merged/experiment_*
 do
-  mv $i/history/*.csv merged/csvs
+  cp $i/history/*.csv merged/csvs
 done
 python3 export_to_csv.py
 
