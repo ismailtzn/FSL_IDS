@@ -361,8 +361,10 @@ def basic_train_test(config):
         n_query
     )
 
-    logging.info("Feature Encoder", feature_encoder)
-    logging.info("Relation Net", relation_network)
+    logging.info("Feature Encoder:")
+    logging.info(feature_encoder)
+    logging.info("Relation Network:")
+    logging.info(relation_network)
     writer.add_graph(model, input_to_model=(torch.rand(model.n_way * model.n_query, 1, 78).cuda(), torch.rand(model.n_way, model.n_support, 1, 78).cuda()))
     writer.flush()
 
