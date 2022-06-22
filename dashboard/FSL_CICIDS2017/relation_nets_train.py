@@ -413,6 +413,7 @@ def basic_train_test(config):
     param_dict["model_encoder_out_dim"] = config.model_encoder_out_dim
     param_dict["model_rel_net_hid_dim"] = config.model_rel_net_hid_dim
     param_dict["experiment_id"] = config.experiment_id
+    param_dict["experiment_type"] = config.experiment_dir_prefix
 
     writer.add_hparams(param_dict, metric_dict)
     writer.flush()
