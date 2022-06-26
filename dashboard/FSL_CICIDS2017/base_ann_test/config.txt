@@ -1,0 +1,10 @@
+{
+    'exp_config': {'dataset_dir': "../../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_4-way5-shot_T8n95q_E4n45q_V12n35q",
+                   'results_dir': "ann_test__4-way5-shot_T8n95q_E4n45q_V12n35q"
+                   },
+
+    'classifier_config': {'output_nodes': 12,
+                          'batch_size': 256,
+                          'epochs': 1000
+                          }
+}
