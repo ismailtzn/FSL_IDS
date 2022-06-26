@@ -7,3 +7,4 @@ tabulate
 h5py==3.6
 torch>=1.11
 tensorflow-gpu>=2.9
+tqdm
