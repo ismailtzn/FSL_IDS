@@ -7,13 +7,13 @@ import itertools
 if __name__ == '__main__':
     template = "--experiment_dir_prefix {experiment_dir_prefix} --meta_train_n_way {meta_train_n_way} --meta_train_k_shot {meta_train_k_shot} --meta_train_query_count {meta_train_query_count} --meta_train_max_epoch {meta_train_max_epoch} --meta_train_epoch_size {meta_train_epoch_size} --dataset_dir {dataset_dir} --model_x_dim0 {model_x_dim0} --model_x_dim1 {model_x_dim1} --model_encoder_hid_dim {model_encoder_hid_dim} --model_encoder_out_dim {model_encoder_out_dim} --model_rel_net_hid_dim {model_rel_net_hid_dim} --learning_rate {learning_rate} --learning_rate_decay {learning_rate_decay} --meta_test_n_way {meta_test_n_way} --meta_test_k_shot {meta_test_k_shot} --meta_test_query_count {meta_test_query_count} --meta_test_episode_count {meta_test_episode_count} --early_stop_change_acc_threshold {early_stop_change_acc_threshold} --early_stop_acc_window_length {early_stop_acc_window_length}"
 
-    experiment_dir_prefix_range = ["relation_nets"]
+    experiment_dir_prefix_range = ["relation_nets_XL"]
     meta_train_n_way_range = [8]
-    meta_train_k_shot_range = [5]
-    meta_train_query_count_range = [5, 95]
+    meta_train_k_shot_range = [10]
+    meta_train_query_count_range = [460]
     meta_train_max_epoch_range = [100]
     meta_train_epoch_size_range = [1000, 5000]
-    dataset_dir_range = ["../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_4-way5-shot_T8n95q_E4n45q_V12n35q"]
+    dataset_dir_range = ["../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_4-way10-shot_T8n460q_E4n460q_V12n120q"]
     model_x_dim0_range = [1]
     model_x_dim1_range = [78]
     model_encoder_hid_dim_range = [64, 128]
@@ -22,8 +22,8 @@ if __name__ == '__main__':
     learning_rate_range = [0.001]
     learning_rate_decay_range = [0.1, 0.25, 0.5]
     meta_test_n_way_range = [4]
-    meta_test_k_shot_range = [5]
-    meta_test_query_count_range = [45]
+    meta_test_k_shot_range = [10]
+    meta_test_query_count_range = [460]
     meta_test_episode_count_range = [1000]
     early_stop_change_acc_threshold_range = [0.0002]
     early_stop_acc_window_length_range = [5]
