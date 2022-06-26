@@ -13,7 +13,7 @@ if __name__ == '__main__':
     meta_train_query_count_range = [460]
     meta_train_max_epoch_range = [100]
     meta_train_epoch_size_range = [1000, 5000]
-    dataset_dir_range = ["../../datasets/CIC_IDS_2017/cic_ids_2017_prepared_4-way10-shot_T8n460q_E4n460q_V12n120q"]
+    dataset_dir_range = ["~/FSL_Datasets/cic_ids_2017_prepared_4-way10-shot_T8n460q_E4n460q_V12n120q"]
     model_x_dim0_range = [1]
     model_x_dim1_range = [78]
     model_encoder_hid_dim_range = [64, 128]
