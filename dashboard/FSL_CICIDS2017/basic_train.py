@@ -44,6 +44,7 @@ def parse_configuration():
     parser.add_argument("--experiment_id", type=str, default=now)
     parser.add_argument("--early_stop_change_acc_threshold", type=float, default=0.0002)
     parser.add_argument("--early_stop_acc_window_length", type=int, default=5)
+    parser.add_argument("--early_stop_train_max_acc", type=float, default=0.995)
 
     config = parser.parse_args()
 
@@ -124,7 +125,7 @@ def train(model, train_x, train_y, config, writer):
             early_stop_acc_window.pop(0)
             change_mean = np.abs([early_stop_acc_window[i] - early_stop_acc_window[i - 1] for i in range(1, len(early_stop_acc_window))]).mean()
             logging.info("Epoch {:d} -- change_mean {:.10f}".format(epoch, change_mean))
-            if epoch_acc > 0.995 or change_mean < config.early_stop_change_acc_threshold:
+            if epoch_acc > config.early_stop_train_max_acc or change_mean < config.early_stop_change_acc_threshold:
                 logging.info("Early stopping")
                 early_stop = True
 

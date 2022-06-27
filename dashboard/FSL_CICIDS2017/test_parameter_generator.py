@@ -5,7 +5,12 @@ import itertools
 # ./test_parameter_generator.py > new_tests/test_parameters.txt
 # split -l 32 new_tests/test_parameters.txt --numeric-suffixes --additional-suffix=.txt new_tests/test_parameters_
 if __name__ == '__main__':
-    template = "--experiment_dir_prefix {experiment_dir_prefix} --meta_train_n_way {meta_train_n_way} --meta_train_k_shot {meta_train_k_shot} --meta_train_query_count {meta_train_query_count} --meta_train_max_epoch {meta_train_max_epoch} --meta_train_epoch_size {meta_train_epoch_size} --dataset_dir {dataset_dir} --model_x_dim0 {model_x_dim0} --model_x_dim1 {model_x_dim1} --model_hid_dim {model_hid_dim} --model_z_dim {model_z_dim} --learning_rate {learning_rate} --learning_rate_decay {learning_rate_decay} --meta_test_n_way {meta_test_n_way} --meta_test_k_shot {meta_test_k_shot} --meta_test_query_count {meta_test_query_count} --meta_test_episode_count {meta_test_episode_count} --early_stop_change_acc_threshold {early_stop_change_acc_threshold} --early_stop_acc_window_length {early_stop_acc_window_length}"
+    template = "--experiment_dir_prefix {experiment_dir_prefix} --meta_train_n_way {meta_train_n_way} --meta_train_k_shot {meta_train_k_shot} --meta_train_query_count {meta_train_query_count} " \
+               "--meta_train_max_epoch {meta_train_max_epoch} --meta_train_epoch_size {meta_train_epoch_size} --dataset_dir {dataset_dir} --model_x_dim0 {model_x_dim0} " \
+               "--model_x_dim1 {model_x_dim1} --model_hid_dim {model_hid_dim} --model_z_dim {model_z_dim} --learning_rate {learning_rate} --learning_rate_decay {learning_rate_decay} " \
+               "--meta_test_n_way {meta_test_n_way} --meta_test_k_shot {meta_test_k_shot} --meta_test_query_count {meta_test_query_count} --meta_test_episode_count {meta_test_episode_count} " \
+               "--early_stop_change_acc_threshold {early_stop_change_acc_threshold} --early_stop_acc_window_length {early_stop_acc_window_length} " \
+               "--early_stop_train_max_acc {early_stop_train_max_acc} "
 
     experiment_dir_prefix_range = ["prototypical_XL"]
     meta_train_n_way_range = [8]
@@ -26,29 +31,31 @@ if __name__ == '__main__':
     meta_test_episode_count_range = [1000]
     early_stop_change_acc_threshold_range = [0.0002]
     early_stop_acc_window_length_range = [5]
+    early_stop_train_max_acc_range = [0.985]
 
     for experiment_dir_prefix, meta_train_n_way, meta_train_k_shot, meta_train_query_count, meta_train_max_epoch, meta_train_epoch_size, dataset_dir, model_x_dim0, model_x_dim1, model_hid_dim, \
         model_z_dim, learning_rate, learning_rate_decay, meta_test_n_way, meta_test_k_shot, \
-        meta_test_query_count, meta_test_episode_count, early_stop_change_acc_threshold, early_stop_acc_window_length in itertools.product(experiment_dir_prefix_range,
-                                                                                                                                           meta_train_n_way_range,
-                                                                                                                                           meta_train_k_shot_range,
-                                                                                                                                           meta_train_query_count_range,
-                                                                                                                                           meta_train_max_epoch_range,
-                                                                                                                                           meta_train_epoch_size_range,
-                                                                                                                                           dataset_dir_range,
-                                                                                                                                           model_x_dim0_range,
-                                                                                                                                           model_x_dim1_range,
-                                                                                                                                           model_hid_dim_range,
-                                                                                                                                           model_z_dim_range,
-                                                                                                                                           learning_rate_range,
-                                                                                                                                           learning_rate_decay_range,
-                                                                                                                                           meta_test_n_way_range,
-                                                                                                                                           meta_test_k_shot_range,
-                                                                                                                                           meta_test_query_count_range,
-                                                                                                                                           meta_test_episode_count_range,
-                                                                                                                                           early_stop_change_acc_threshold_range,
-                                                                                                                                           early_stop_acc_window_length_range
-                                                                                                                                           ):
+        meta_test_query_count, meta_test_episode_count, early_stop_change_acc_threshold, early_stop_acc_window_length, early_stop_train_max_acc in itertools.product(experiment_dir_prefix_range,
+                                                                                                                                                                     meta_train_n_way_range,
+                                                                                                                                                                     meta_train_k_shot_range,
+                                                                                                                                                                     meta_train_query_count_range,
+                                                                                                                                                                     meta_train_max_epoch_range,
+                                                                                                                                                                     meta_train_epoch_size_range,
+                                                                                                                                                                     dataset_dir_range,
+                                                                                                                                                                     model_x_dim0_range,
+                                                                                                                                                                     model_x_dim1_range,
+                                                                                                                                                                     model_hid_dim_range,
+                                                                                                                                                                     model_z_dim_range,
+                                                                                                                                                                     learning_rate_range,
+                                                                                                                                                                     learning_rate_decay_range,
+                                                                                                                                                                     meta_test_n_way_range,
+                                                                                                                                                                     meta_test_k_shot_range,
+                                                                                                                                                                     meta_test_query_count_range,
+                                                                                                                                                                     meta_test_episode_count_range,
+                                                                                                                                                                     early_stop_change_acc_threshold_range,
+                                                                                                                                                                     early_stop_acc_window_length_range,
+                                                                                                                                                                     early_stop_train_max_acc_range
+                                                                                                                                                                     ):
         generated = template.format(
             experiment_dir_prefix=experiment_dir_prefix,
             meta_train_n_way=meta_train_n_way,
@@ -68,6 +75,7 @@ if __name__ == '__main__':
             meta_test_query_count=meta_test_query_count,
             meta_test_episode_count=meta_test_episode_count,
             early_stop_change_acc_threshold=early_stop_change_acc_threshold,
-            early_stop_acc_window_length=early_stop_acc_window_length
+            early_stop_acc_window_length=early_stop_acc_window_length,
+            early_stop_train_max_acc=early_stop_train_max_acc
         )
         print(generated)
