@@ -22,6 +22,6 @@ done
 python3 "$SCRIPT_DIR/export_to_csv.py"
 
 # clear
-rm -rf csvs experiment_*
+rm -rf csvs experiment_*/
 
 tensorboard --logdir=merged/runs
