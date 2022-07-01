@@ -1,0 +1,13 @@
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       116      1       2                2           2                   0                0              2           4              0                         0                 1
+Bot                           37     90       0                0           0                   0                0              0           2              1                         0                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              128           0                   0                1              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              1                         0                 0
+DoS Slowhttptest               6      0       4               10           0                  73               37              0           0              0                         0                 0
+DoS slowloris                  0      0       0                0           0                   0              129              0           0              1                         0                 0
+FTP-Patator                    0      0       0                0           0                   0                0            130           0              0                         0                 0
+PortScan                       2      0       0                0           0                   0                0              0         128              0                         0                 0
+SSH-Patator                    1      0       0                0           0                   0                0              1           0            128                         0                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0             12                         9               109
+Web Attack XSS                 4      0       0                1           0                   0                0              0           0              1                         0               124
