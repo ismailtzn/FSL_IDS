@@ -144,7 +144,7 @@ def train(model, train_x, train_y, config, writer):
     param_dict = {
         "MetaTrain/learning_rate": config.learning_rate,
         "MetaTrain/learning_rate_decay": config.learning_rate_decay,
-        "MetaTrain/max_epoch": config.meta_train_max_epoch,
+        "MetaTrain/max_epoch": epoch,
         "MetaTrain/epoch_size": config.meta_train_epoch_size,
         "MetaTrain/early_stop": early_stop,
         "MetaTrain/n": model.n_way,
