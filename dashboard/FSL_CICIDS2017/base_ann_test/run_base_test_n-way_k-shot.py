@@ -101,8 +101,8 @@ def run_experiment(exp_config, classifier_config):
     history = classifier.fit(X_train, y_train_enc)
     evaluation_info = evaluate_intrusion_detector(classifier, X_test, y_test, label_encoder)
     write_report(exp_config['results_dir'], evaluation_info, label_encoder.classes_)
-    utility.plot_training_history(history, exp_config['results_dir'])
-    utility.save_training_history(history, exp_config['results_dir'])
+    # utility.plot_training_history(history, exp_config['results_dir'])
+    # utility.save_training_history(history, exp_config['results_dir'])
 
 
 def main():
