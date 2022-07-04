@@ -48,19 +48,19 @@ def load_datasets(exp_config, hdf_key="cic_ids_2017"):
 
     x_train_dfs = [pd.read_hdf(file, hdf_key) for file in x_train_files]
     y_train_dfs = [pd.read_hdf(file, hdf_key) for file in y_train_files]
-    x_test_dfs = [pd.read_hdf(file, hdf_key) for file in x_test_files]
-    y_test_dfs = [pd.read_hdf(file, hdf_key) for file in y_test_files]
+    # x_test_dfs = [pd.read_hdf(file, hdf_key) for file in x_test_files]
+    # y_test_dfs = [pd.read_hdf(file, hdf_key) for file in y_test_files]
     x_val_dfs = [pd.read_hdf(file, hdf_key) for file in x_val_files]
     y_val_dfs = [pd.read_hdf(file, hdf_key) for file in y_val_files]
 
-    x_test_df = pd.concat(x_test_dfs)
-    y_test_df = pd.concat(y_test_dfs)
+    # x_test_df = pd.concat(x_test_dfs)
+    # y_test_df = pd.concat(y_test_dfs)
 
-    y_test_df = y_test_df.groupby(y_test_df).sample(n=exp_config["k"])
-    x_test_df = x_test_df.loc[y_test_df.index]
+    # y_test_df = y_test_df.groupby(y_test_df).sample(n=exp_config["k"])
+    # x_test_df = x_test_df.loc[y_test_df.index]
 
-    x_train_dfs.append(x_test_df)
-    y_train_dfs.append(y_test_df)
+    # x_train_dfs.append(x_test_df)
+    # y_train_dfs.append(y_test_df)
 
     x_train = pd.concat(x_train_dfs)
     x_val = pd.concat(x_val_dfs)
@@ -109,7 +109,9 @@ def run_experiment(exp_config, classifier_config):
     # load dataset
     datasets_orig = load_datasets(exp_config)
     (X_train, y_train), (X_test, y_test) = datasets_orig
-    y_train_enc, label_encoder = utility.encode_data(y_train)
+    # y_train_enc, label_encoder = utility.encode_data(y_train)
+    label_encoder, unused = utility.encode_labels(y_test, encoder=None)
+    unused, y_train_enc = utility.encode_labels(y_train, encoder=label_encoder)
 
     classifier = AttackClassifier(classifier_config)
     history = classifier.fit(X_train, y_train_enc)
