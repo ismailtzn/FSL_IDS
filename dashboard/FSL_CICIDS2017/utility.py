@@ -184,6 +184,50 @@ def load_protonet_conv(**kwargs):
     return ProtoNet.ProtoNet(encoder, n_way, n_support, n_query)
 
 
+def load_protonet_ann(**kwargs):
+    """
+    Loads the prototypical network model
+    Arg:
+        x_dim (tuple): dimension of input instance
+        hid_dim (int): dimension of hidden layers
+        z_dim (int): dimension of embedded instance
+    Returns:
+        Model (Class ProtoNet)
+    """
+    x_dim = kwargs["x_dim"]
+    hid_dim = kwargs["hid_dim"]
+    z_dim = kwargs["z_dim"]
+    n_way = kwargs["n_way"]
+    n_support = kwargs["n_support"]
+    n_query = kwargs["n_query"]
+
+    layer1 = nn.Sequential(
+        nn.Linear(in_features=x_dim[1], out_features=hid_dim),
+        nn.BatchNorm1d(1),
+        nn.ReLU(),
+        nn.Dropout(0.2)
+    )
+    layer2 = nn.Sequential(
+        nn.Linear(in_features=hid_dim, out_features=hid_dim),
+        nn.BatchNorm1d(1),
+        nn.ReLU(),
+        nn.Dropout(0.2)
+    )
+    layer3 = nn.Sequential(
+        nn.Linear(in_features=hid_dim, out_features=z_dim),
+        nn.BatchNorm1d(1),
+        nn.ReLU(),
+        nn.Dropout(0.2)
+    )
+    encoder = nn.Sequential(
+        layer1,
+        layer2,
+        layer3,
+        ProtoNet.Flatten()
+    )
+
+    return ProtoNet.ProtoNet(encoder, n_way, n_support, n_query)
+
 def sum_dicts(x, y):
     result = {}
     if x.keys() != y.keys():
