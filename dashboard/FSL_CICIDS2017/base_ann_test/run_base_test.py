@@ -95,14 +95,18 @@ def evaluate_intrusion_detector(classifier, X_test, y_test, label_encoder):
 def write_report(result_dir, evaluation_info, classes):
     general_info, detailed_info, cf_matrix, report = evaluation_info
     classes = list(classes)
-    with open(result_dir + "/cf_matrix.csv", "w") as f:
+    with open(result_dir + "/cf_matrix.csv", "a") as f:
+        f.write("\n")
         f.write(tabulate(cf_matrix, tablefmt="plain", showindex=classes, headers=classes))
 
     general_df = pd.DataFrame(general_info, index=[0])
     detailed_df = pd.DataFrame(detailed_info, index=[0])
 
-    general_df.to_csv(result_dir + '/base_general_eval_info_table.csv', sep='\t')
-    detailed_df.to_csv(result_dir + '/base_detailed_eval_info_table.csv', sep='\t')
+    general_out_path = result_dir + '/base_general_eval_info_table.csv'
+    general_df.to_csv(general_out_path, sep='\t', mode='a', header=not os.path.exists(general_out_path))
+    detailed_out_path = result_dir + '/base_detailed_eval_info_table.csv'
+    detailed_df.to_csv(detailed_out_path, sep='\t', mode='a', header=not os.path.exists(detailed_out_path))
+
 
 
 def run_experiment(exp_config, classifier_config):
@@ -117,8 +121,8 @@ def run_experiment(exp_config, classifier_config):
     history = classifier.fit(X_train, y_train_enc)
     evaluation_info = evaluate_intrusion_detector(classifier, X_test, y_test, label_encoder)
     write_report(exp_config['results_dir'], evaluation_info, label_encoder.classes_)
-    utility.plot_training_history(history, exp_config['results_dir'])
-    utility.save_training_history(history, exp_config['results_dir'])
+    # utility.plot_training_history(history, exp_config['results_dir'])
+    # utility.save_training_history(history, exp_config['results_dir'])
 
 
 def main():
