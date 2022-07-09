@@ -1,0 +1,57 @@
+2022-07-09 19:21:26,334 [INFO] Initialized logging. log_filename = cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/run_log.log
+2022-07-09 19:21:26,334 [INFO] Running script with following parameters
+Namespace(base_dir='cic_ids_2017_prepared_4-way10-shot_T8n460q_E4n460q_V12n120q', hdf_key='cic_ids_2017', meta_test_class=['PortScan', 'Bot', 'FTP-Patator', 'SSH-Patator'], out_dir='cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP')
+2022-07-09 19:21:26,433 [INFO] Saving prepared datasets (train, val, test) to: cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP
+2022-07-09 19:21:26,433 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/x_meta_train.h5
+2022-07-09 19:21:26,481 [INFO] Writing complete. time_to_write=0.04791569709777832
+2022-07-09 19:21:26,481 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/y_meta_train.h5
+2022-07-09 19:21:26,485 [INFO] Writing complete. time_to_write=0.004474163055419922
+2022-07-09 19:21:26,486 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/x_meta_test.h5
+2022-07-09 19:21:26,507 [INFO] Writing complete. time_to_write=0.02163243293762207
+2022-07-09 19:21:26,508 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/y_meta_test.h5
+2022-07-09 19:21:26,512 [INFO] Writing complete. time_to_write=0.004277229309082031
+2022-07-09 19:21:26,512 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/x_meta_val.h5
+2022-07-09 19:21:26,535 [INFO] Writing complete. time_to_write=0.022525310516357422
+2022-07-09 19:21:26,535 [INFO] Writing dataset to HDF5 format. filename=cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP/y_meta_val.h5
+2022-07-09 19:21:26,539 [INFO] Writing complete. time_to_write=0.003764629364013672
+2022-07-09 19:21:26,539 [INFO] Saving complete
+2022-07-09 19:21:26,539 [INFO] Meta train dataset shape = (3760, 78)
+2022-07-09 19:21:26,539 [INFO] Meta test dataset shape = (1880, 78)
+2022-07-09 19:21:26,539 [INFO] Meta val dataset shape = (1560, 78)
+2022-07-09 19:21:26,540 [INFO] Meta train dataset  
+DoS Slowhttptest          470
+Web Attack Brute Force    470
+Web Attack XSS            470
+BENIGN                    470
+DDoS                      470
+DoS GoldenEye             470
+DoS Hulk                  470
+DoS slowloris             470
+Name: Label, dtype: int64
+2022-07-09 19:21:26,541 [INFO] Meta test dataset  
+PortScan       470
+Bot            470
+FTP-Patator    470
+SSH-Patator    470
+Name: Label, dtype: int64
+2022-07-09 19:21:26,542 [INFO] Meta val dataset  
+BENIGN                    130
+DDoS                      130
+DoS GoldenEye             130
+DoS Hulk                  130
+DoS slowloris             130
+FTP-Patator               130
+PortScan                  130
+SSH-Patator               130
+Bot                       130
+DoS Slowhttptest          130
+Web Attack Brute Force    130
+Web Attack XSS            130
+Name: Label, dtype: int64
+2022-07-09 19:21:26,543 [INFO] 8 Labels used int meta train = 
+DoS Slowhttptest, Web Attack Brute Force, Web Attack XSS, BENIGN, DDoS, DoS GoldenEye, DoS Hulk, DoS slowloris
+2022-07-09 19:21:26,543 [INFO] 4 Labels used int meta test = 
+PortScan, Bot, FTP-Patator, SSH-Patator
+2022-07-09 19:21:26,543 [INFO] 12 Labels used int meta val = 
+BENIGN, DDoS, DoS GoldenEye, DoS Hulk, DoS slowloris, FTP-Patator, PortScan, SSH-Patator, Bot, DoS Slowhttptest, Web Attack Brute Force, Web Attack XSS
+2022-07-09 19:21:26,544 [INFO] Data preparation complete
