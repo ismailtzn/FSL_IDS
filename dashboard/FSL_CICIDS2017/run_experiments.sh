@@ -22,4 +22,4 @@ do
   python3 $scriptFile $line > "run_experiments_logs/experiment_$i.log" 2>&1
 done < "$input"
 
-./publish_results.sh $input
+./publish_results.sh $input $3

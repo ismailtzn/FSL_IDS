@@ -17,4 +17,4 @@ conda activate torch-env
 conda init
 
 cd /truba/home/$USER/FSL_IDS/dashboard/FSL_CICIDS2017/
-./run_experiments.sh $1 $2 > run_experiments.log 2>&1
+./run_experiments.sh $1 $2 $3 > run_experiments.log 2>&1
