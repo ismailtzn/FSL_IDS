@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p akya-cuda        	# Kuyruk adi: Uzerinde GPU olan kuyruk olmasina dikkat edin.
+#SBATCH -p barbun-cuda        	# Kuyruk adi: Uzerinde GPU olan kuyruk olmasina dikkat edin.
 #SBATCH -A ituzun         	    # Kullanici adi
 #SBATCH -J agent1_torch_experiment     # Gonderilen isin ismi
 #SBATCH --dependency singleton
@@ -7,7 +7,7 @@
 #SBATCH --gres=gpu:1        	# Her bir sunucuda kac GPU istiyorsunuz? Kumeleri kontrol edin.
 #SBATCH -N 1                	# Gorev kac node'da calisacak?
 #SBATCH -n 1                	# Ayni gorevden kac adet calistirilacak?
-#SBATCH --cpus-per-task 10  	# Her bir gorev kac cekirdek kullanacak? Kumeleri kontrol edin.
+#SBATCH --cpus-per-task 20  	# Her bir gorev kac cekirdek kullanacak? Kumeleri kontrol edin.
 #SBATCH --time=1-23:00:00      	# Sure siniri koyun.
 #SBATCH --mail-user=e2036234@ceng.metu.edu.tr
 #SBATCH --mail-type=ALL
