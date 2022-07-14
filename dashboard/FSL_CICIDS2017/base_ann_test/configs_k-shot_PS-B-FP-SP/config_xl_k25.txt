@@ -1,6 +1,6 @@
 {
     'exp_config': {'dataset_dir': "../../../datasets/CIC_IDS_2017/cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP",
-                   'results_dir': "ann_test_xl_25",
+                   'results_dir': "ann_test_xl_only_suport_set_provided_PS-B-FP-SP/ann_test_xl_25",
                    'k': 25
                    },
 
