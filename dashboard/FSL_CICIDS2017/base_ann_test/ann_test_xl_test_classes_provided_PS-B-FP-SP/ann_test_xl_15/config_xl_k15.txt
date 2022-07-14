@@ -1,0 +1,11 @@
+{
+    'exp_config': {'dataset_dir': "../../../datasets/CIC_IDS_2017/cic_ids_2017_8t470_4t470_12v130_PS-B-FP-SP",
+                   'results_dir': "ann_test_xl_15",
+                   'k': 15
+                   },
+
+    'classifier_config': {'output_nodes': 12,
+                          'batch_size': 256,
+                          'epochs': 10000
+                          }
+}

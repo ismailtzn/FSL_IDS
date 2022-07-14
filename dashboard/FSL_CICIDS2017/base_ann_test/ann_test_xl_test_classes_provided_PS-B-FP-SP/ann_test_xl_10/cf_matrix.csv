@@ -1,0 +1,209 @@
+
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       122      0       0                0           3                   1                0              0           1              0                         2                 1
+Bot                           84     33       0                0           0                   0                8              3           2              0                         0                 0
+DDoS                           0      0     129                0           1                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       1                0         128                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               1      0       0                0           0                 121                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   27      0       0                0           3                   0                1             98           0              0                         1                 0
+PortScan                      57      0       0                0           0                   0               12              0          59              0                         2                 0
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 3      0       0                1           0                   0                0              0           0              0                         2               124
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       120      2       0                0           5                   1                1              0           0              0                         1                 0
+Bot                           61     58       0                1           1                   0                2              0           6              0                         1                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              127           0                   2                0              1           0              0                         0                 0
+DoS Hulk                       0      0       0                0         128                   1                0              0           0              0                         0                 1
+DoS Slowhttptest               3      0       0                0           0                 119                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             65           0              0                         1                 0
+PortScan                      52      0       0                0           0                   0               11              0          66              0                         0                 1
+SSH-Patator                    2      0       0                0           0                   0                0              0           0             62                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       118      1       2                1           2                   1                1              0           0              0                         0                 4
+Bot                           60     61       0                0           0                   0                2              0           2              0                         4                 1
+DDoS                           1      0     129                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              126           0                   2                0              0           0              0                         1                 1
+DoS Hulk                       1      0       0                0         127                   1                0              0           0              0                         1                 0
+DoS Slowhttptest               1      0       0                0           0                 128                1              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   7              122              0           0              0                         0                 0
+FTP-Patator                   27      0       0                0           0                   0               37             65           0              0                         1                 0
+PortScan                      65      0       0                0           0                   0                8              0          55              0                         2                 0
+SSH-Patator                    2      0       0                0           0                   0                0              0           0             62                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         1               128
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       119      0       0                1           4                   2                0              0           0              0                         2                 2
+Bot                          119      1       0                0           0                   0                4              0           1              0                         5                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       1      0       0                0         127                   1                0              0           0              0                         1                 0
+DoS Slowhttptest               0      0       0                0           0                 121                9              0           0              0                         0                 0
+DoS slowloris                  3      0       0                0           0                   4              123              0           0              0                         0                 0
+FTP-Patator                   62      0       0                0           0                   0                0             65           0              0                         3                 0
+PortScan                      66      0       0                0           0                   0               14              0          50              0                         0                 0
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       120      0       2                0           3                   1                0              0           0              0                         0                 4
+Bot                           81     40       0                0           4                   0                0              0           2              0                         1                 2
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         128                   1                0              0           0              0                         1                 0
+DoS Slowhttptest               0      0       0                0           0                 128                2              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   5              124              0           0              0                         0                 0
+FTP-Patator                   64      1       0                0           0                   0                0             65           0              0                         0                 0
+PortScan                      51      0       0                0           0                   0               11              0          68              0                         0                 0
+SSH-Patator                    1      0       0                0           1                   0                0              0           0             63                        65                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       117      0       3                0           5                   1                0              0           1              0                         0                 3
+Bot                          115      1       0                0           2                   0                5              0           7              0                         0                 0
+DDoS                           0      0     129                0           1                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       1                0         128                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               3      0       0                0           0                 119                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   27      0       0                0           0                   0               37             65           0              0                         1                 0
+PortScan                      54      0       0                0           0                   0                6              0          70              0                         0                 0
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             62                        66                 1
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        57                73
+Web Attack XSS                 1      0       0                1           0                   0                0              0           0              0                        15               113
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       117      0       2                2           4                   1                0              0           0              0                         2                 2
+Bot                           85     37       0                0           3                   0                5              0           0              0                         0                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               3      0       0                0           0                 119                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   28      0       0                0           0                   0                0            102           0              0                         0                 0
+PortScan                      44      0       0                0           0                   0               14              0          72              0                         0                 0
+SSH-Patator                    2      0       0                0           0                   0                0              0           0             62                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        51                79
+Web Attack XSS                 1      0       0                1           0                   0                0              0           0              0                        14               114
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       118      0       3                1           4                   1                0              0           1              0                         1                 1
+Bot                           72     54       0                0           2                   1                1              0           0              0                         0                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              0                         0                 1
+DoS Slowhttptest               3      0       0                0           0                 126                1              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   7              122              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             65           0              0                         1                 0
+PortScan                      57      0       0                0           0                   0                6              0          64              0                         3                 0
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             63                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       118      0       2                1           3                   1                0              0           0              0                         1                 4
+Bot                           67     52       0                0           3                   0                2              0           5              0                         1                 0
+DDoS                           1      0     129                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         128                   1                0              0           0              0                         1                 0
+DoS Slowhttptest               0      0       0                0           0                 120               10              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   4              125              0           0              0                         0                 0
+FTP-Patator                   31      0       0                0           0                   0                0             98           0              0                         1                 0
+PortScan                      51      0       0                0           0                   0                9              0          68              0                         0                 2
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       119      0       1                0           5                   1                0              0           2              0                         0                 2
+Bot                          116      4       0                0           0                   0                7              0           0              0                         0                 3
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              128           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               1      0       0                0           0                 120                9              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   4              125              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             66           0              0                         0                 0
+PortScan                      54      0       0                0           0                   0               19              0          56              0                         1                 0
+SSH-Patator                    0      0       0                0           1                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       118      0       2                1           2                   1                1              0           0              0                         3                 2
+Bot                           36     83       0                0           0                   0                2              0           2              1                         6                 0
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              0                         0                 1
+DoS Slowhttptest               3      0       0                0           0                 126                1              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   7              122              0           0              0                         0                 0
+FTP-Patator                   27      1       0                0           0                   0               35             65           0              0                         2                 0
+PortScan                      61      0       0                0           0                   0                3              0          66              0                         0                 0
+SSH-Patator                    1      0       0                0           1                   0                0              1           0             62                        65                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        24               106
+Web Attack XSS                 3      0       0                1           0                   0                0              0           0              0                         4               122
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       116      0       3                0           5                   1                0              0           0              0                         3                 2
+Bot                          118      2       0                0           2                   0                7              0           1              0                         0                 0
+DDoS                           1      0     129                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              127           0                   3                0              0           0              0                         0                 0
+DoS Hulk                       1      0       0                0         127                   1                0              0           0              0                         1                 0
+DoS Slowhttptest               2      0       0                0           0                 127                1              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   7              122              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             65           0              0                         1                 0
+PortScan                      53      0       0                0           0                   0               19              0          58              0                         0                 0
+SSH-Patator                    4      0       0                0           0                   0                0              0           0             60                        65                 1
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        57                73
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                        14               115
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       121      0       1                1           3                   1                1              0           0              0                         0                 2
+Bot                           78     39       0                0           0                   0                0              0           8              0                         2                 3
+DDoS                           0      0     130                0           0                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      0       0              127           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       1      0       1                0         127                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               1      0       0                0           0                 121                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   7              122              0           0              0                         0                 0
+FTP-Patator                   64      1       0                0           0                   0                0             65           0              0                         0                 0
+PortScan                      66      0       0                0           0                   0                2              0          62              0                         0                 0
+SSH-Patator                    1      0       0                0           0                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 1      0       0                1           0                   0                0              0           0              0                         1               127
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       120      0       2                0           5                   1                0              0           0              0                         0                 2
+Bot                           85     35       0                0           6                   0                2              0           0              0                         0                 2
+DDoS                           0      0     129                0           1                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              127           0                   2                0              0           0              0                         1                 0
+DoS Hulk                       0      0       0                1         128                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               2      0       0                0           0                 119                9              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             66           0              0                         0                 0
+PortScan                      45      0       0                0           0                   0               18              0          67              0                         0                 0
+SSH-Patator                    2      0       0                0           0                   0                0              0           0             62                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        44                86
+Web Attack XSS                 0      0       0                1           0                   1                0              0           0              0                        14               114
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       125      0       0                0           2                   1                1              0           0              0                         0                 1
+Bot                           73     47       0                0           0                   0                2              0           6              0                         2                 0
+DDoS                           0      0     129                0           1                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  0      0       0              127           0                   2                1              0           0              0                         0                 0
+DoS Hulk                       0      0       0                0         129                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               0      0       0                0           0                 121                9              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   64      0       0                0           0                   0                0             65           0              0                         1                 0
+PortScan                      65      0       0                0           0                   0               11              0          53              0                         1                 0
+SSH-Patator                    0      0       0                0           1                   0                0              0           0             63                        66                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 3      0       0                1           0                   0                0              0           0              0                         2               124
+                          BENIGN    Bot    DDoS    DoS GoldenEye    DoS Hulk    DoS Slowhttptest    DoS slowloris    FTP-Patator    PortScan    SSH-Patator    Web Attack Brute Force    Web Attack XSS
+BENIGN                       120      1       0                0           4                   2                1              0           0              0                         2                 0
+Bot                           72     48       0                0           0                   0                7              0           1              0                         1                 1
+DDoS                           0      0     129                0           1                   0                0              0           0              0                         0                 0
+DoS GoldenEye                  1      1       0              126           0                   2                0              0           0              0                         0                 0
+DoS Hulk                       0      0       1                0         128                   0                0              0           0              0                         1                 0
+DoS Slowhttptest               1      0       0                0           0                 121                8              0           0              0                         0                 0
+DoS slowloris                  1      0       0                0           0                   6              123              0           0              0                         0                 0
+FTP-Patator                   27      1       0                0           0                   0               37             65           0              0                         0                 0
+PortScan                      66     10       0                0           0                   0                6              0          45              0                         3                 0
+SSH-Patator                    0      0       0                0           1                   0                0              0           0             62                        67                 0
+Web Attack Brute Force         0      0       0                0           0                   0                0              0           0              0                        21               109
+Web Attack XSS                 0      0       0                1           0                   0                0              0           0              0                         2               127
