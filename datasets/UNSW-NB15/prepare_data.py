@@ -145,6 +145,15 @@ def pre_process_dataset(params):
 
     all_data = load_datasets(params["unsw_nb15_files_list"])
 
+    categorical_columns = ["proto", "service", "state"]
+    one_hots = [all_data]
+    for categorical_column in categorical_columns:
+        one_hot = pd.get_dummies(all_data[categorical_column], prefix=categorical_column, drop_first=False)
+        one_hots.append(one_hot)
+
+    all_data = pd.concat(one_hots, axis=1)
+    all_data.drop(columns=categorical_columns, inplace=True)
+
     # Check class labels
     label_counts, label_perc = count_labels(all_data["Label"])
     logging.info("Label counts below")

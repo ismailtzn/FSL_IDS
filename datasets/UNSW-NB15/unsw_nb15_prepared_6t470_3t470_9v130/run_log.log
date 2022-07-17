@@ -1,5 +1,5 @@
-2022-07-14 18:34:43,953 [INFO] Initialized logging. log_filename = unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/run_log.log
-2022-07-14 18:34:43,954 [INFO] Running script with following parameters
+2022-07-15 10:38:22,264 [INFO] Initialized logging. log_filename = unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/run_log.log
+2022-07-15 10:38:22,264 [INFO] Running script with following parameters
 {'hdf_key': 'unsw_nb15',
  'k_shot': 5,
  'n_test': 3,
@@ -15,13 +15,13 @@
                           'testing set/UNSW_NB15_testing-set.csv',
                           'UNSW-NB15 - CSV Files/a part of training and '
                           'testing set/UNSW_NB15_training-set.csv']}
-2022-07-14 18:34:45,941 [INFO] Loading datasets
-2022-07-14 18:34:45,944 [INFO] Loading datasets in files
-2022-07-14 18:34:46,841 [INFO] None
-2022-07-14 18:34:50,801 [INFO] Loading datasets complete
-2022-07-14 18:34:50,813 [INFO] Total count = 257673
-2022-07-14 18:34:50,813 [INFO] Label counts below
-2022-07-14 18:34:50,814 [INFO] 
+2022-07-15 10:38:22,264 [INFO] Loading datasets
+2022-07-15 10:38:22,265 [INFO] Loading datasets in files
+2022-07-15 10:38:23,398 [INFO] None
+2022-07-15 10:38:23,491 [INFO] Loading datasets complete
+2022-07-15 10:38:23,778 [INFO] Total count = 257673
+2022-07-15 10:38:23,778 [INFO] Label counts below
+2022-07-15 10:38:23,779 [INFO] 
 Normal            93000
 Generic           58871
 Exploits          44525
@@ -33,8 +33,8 @@ Backdoor           2329
 Shellcode          1511
 Worms               174
 Name: Label, dtype: int64
-2022-07-14 18:34:50,814 [INFO] Label percentages below
-2022-07-14 18:34:50,815 [INFO] 
+2022-07-15 10:38:23,779 [INFO] Label percentages below
+2022-07-15 10:38:23,779 [INFO] 
 Normal           0.3609
 Generic          0.2285
 Exploits         0.1728
@@ -46,7 +46,7 @@ Backdoor         0.0090
 Shellcode        0.0059
 Worms            0.0007
 Name: Label, dtype: float64
-2022-07-14 18:35:16,510 [INFO] Train set :
+2022-07-15 10:38:24,827 [INFO] Train set :
 DoS               470
 Exploits          470
 Fuzzers           470
@@ -54,12 +54,12 @@ Generic           470
 Normal            470
 Reconnaissance    470
 Name: Label, dtype: int64
-2022-07-14 18:35:16,997 [INFO] Test set :
+2022-07-15 10:38:24,828 [INFO] Test set :
 Analysis     470
 Backdoor     470
 Shellcode    470
 Name: Label, dtype: int64
-2022-07-14 18:35:17,489 [INFO] Validation set :
+2022-07-15 10:38:24,828 [INFO] Validation set :
 DoS               130
 Exploits          130
 Fuzzers           130
@@ -70,7 +70,7 @@ Analysis          130
 Backdoor          130
 Shellcode         130
 Name: Label, dtype: int64
-2022-07-14 18:35:18,215 [INFO] Remaining df :
+2022-07-15 10:38:24,842 [INFO] Remaining df :
 Normal            92400
 Generic           58271
 Exploits          43925
@@ -82,29 +82,29 @@ Backdoor           1729
 Shellcode           911
 Worms               174
 Name: Label, dtype: int64
-2022-07-14 18:35:22,388 [INFO] Saving prepared datasets (train, val, test) to: unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q
-2022-07-14 18:35:22,908 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_train.h5
-2022-07-14 18:35:23,050 [INFO] Writing complete. time_to_write=0.1414813995361328
-2022-07-14 18:35:23,645 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_train.h5
-2022-07-14 18:35:23,653 [INFO] Writing complete. time_to_write=0.007821083068847656
-2022-07-14 18:35:24,152 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_test.h5
-2022-07-14 18:35:24,209 [INFO] Writing complete. time_to_write=0.055895328521728516
-2022-07-14 18:35:25,290 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_test.h5
-2022-07-14 18:35:25,308 [INFO] Writing complete. time_to_write=0.017044782638549805
-2022-07-14 18:35:26,032 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_val.h5
-2022-07-14 18:35:26,053 [INFO] Writing complete. time_to_write=0.02044510841369629
-2022-07-14 18:35:26,402 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_val.h5
-2022-07-14 18:35:26,420 [INFO] Writing complete. time_to_write=0.01749110221862793
-2022-07-14 18:35:26,873 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/remaining_df.h5
-2022-07-14 18:35:28,005 [INFO] Writing complete. time_to_write=1.1314613819122314
-2022-07-14 18:35:30,496 [INFO] Saving complete
-2022-07-14 18:35:30,497 [INFO] Meta train dataset shape = (2820, 43)
-2022-07-14 18:35:30,497 [INFO] Meta test dataset shape = (1410, 43)
-2022-07-14 18:35:30,498 [INFO] Meta val dataset shape = (1170, 43)
-2022-07-14 18:35:30,499 [INFO] 6 Labels used int meta train = 
+2022-07-15 10:38:24,842 [INFO] Saving prepared datasets (train, val, test) to: unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q
+2022-07-15 10:38:24,842 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_train.h5
+2022-07-15 10:38:24,884 [INFO] Writing complete. time_to_write=0.04180741310119629
+2022-07-15 10:38:24,884 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_train.h5
+2022-07-15 10:38:24,889 [INFO] Writing complete. time_to_write=0.00465083122253418
+2022-07-15 10:38:24,889 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_test.h5
+2022-07-15 10:38:24,907 [INFO] Writing complete. time_to_write=0.018275976181030273
+2022-07-15 10:38:24,907 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_test.h5
+2022-07-15 10:38:24,912 [INFO] Writing complete. time_to_write=0.004584312438964844
+2022-07-15 10:38:24,912 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/x_meta_val.h5
+2022-07-15 10:38:24,930 [INFO] Writing complete. time_to_write=0.01784992218017578
+2022-07-15 10:38:24,930 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/y_meta_val.h5
+2022-07-15 10:38:24,934 [INFO] Writing complete. time_to_write=0.003902435302734375
+2022-07-15 10:38:24,934 [INFO] Writing dataset to HDF5 format. filename=unsw_nb15_prepared_3-way5-shot_T6n465q_E3n465q_V9n125q/remaining_df.h5
+2022-07-15 10:38:26,308 [INFO] Writing complete. time_to_write=1.3739290237426758
+2022-07-15 10:38:26,309 [INFO] Saving complete
+2022-07-15 10:38:26,309 [INFO] Meta train dataset shape = (2820, 197)
+2022-07-15 10:38:26,309 [INFO] Meta test dataset shape = (1410, 197)
+2022-07-15 10:38:26,309 [INFO] Meta val dataset shape = (1170, 197)
+2022-07-15 10:38:26,309 [INFO] 6 Labels used int meta train = 
 DoS, Exploits, Fuzzers, Generic, Normal, Reconnaissance
-2022-07-14 18:35:30,501 [INFO] 3 Labels used int meta test = 
+2022-07-15 10:38:26,309 [INFO] 3 Labels used int meta test = 
 Analysis, Backdoor, Shellcode
-2022-07-14 18:35:30,502 [INFO] 9 Labels used int meta val = 
+2022-07-15 10:38:26,310 [INFO] 9 Labels used int meta val = 
 DoS, Exploits, Fuzzers, Generic, Normal, Reconnaissance, Analysis, Backdoor, Shellcode
-2022-07-14 18:35:30,511 [INFO] Data preparation complete
+2022-07-15 10:38:26,314 [INFO] Data preparation complete
