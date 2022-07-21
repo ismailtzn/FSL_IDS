@@ -45,6 +45,7 @@ def parse_configuration():
     parser.add_argument("--early_stop_change_acc_threshold", type=float, default=0.0002)
     parser.add_argument("--early_stop_acc_window_length", type=int, default=5)
     parser.add_argument("--early_stop_train_max_acc", type=float, default=0.98)
+    parser.add_argument("--hdf_key", type=str, default="cic_ids_2017")
 
     config = parser.parse_args()
 
@@ -317,7 +318,7 @@ def basic_train_test(config):
     n_query = config.meta_train_query_count
     sample_count = n_support + n_query
 
-    (train_x, train_y), (test_x, test_y) = utility.load_datasets(config.dataset_dir)
+    (train_x, train_y), (test_x, test_y) = utility.load_datasets(config.dataset_dir, config.hdf_key)
 
     logging.info("n_way: {}, n_support: {}, n_query: {}".format(n_way, n_support, n_query))
     logging.info("Shapes => train_x:{}, train_y:{}, test_x:{}, test_y:{}".format(train_x.shape, train_y.shape, test_x.shape, test_y.shape))
@@ -333,7 +334,7 @@ def basic_train_test(config):
         n_query=n_query
     )
     logging.info(model.encoder)
-    writer.add_graph(model.encoder, torch.rand(1, 1, 78).cuda())
+    writer.add_graph(model.encoder, torch.rand(1, config.model_x_dim0, config.model_x_dim1).cuda())
     writer.flush()
 
     param_dict, metric_dict, train_history = train(
@@ -367,7 +368,7 @@ def basic_train_test(config):
 
     log_history(config, test_history, writer, "Test")
 
-    x_val, y_val = utility.load_val_datasets(config.dataset_dir)
+    x_val, y_val = utility.load_val_datasets(config.dataset_dir, config.hdf_key)
     val_param_dict, val_metric_dict, val_history = validate(
         model,
         x_val,

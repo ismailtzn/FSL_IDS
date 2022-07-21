@@ -61,7 +61,10 @@ class RelationNetwork(nn.Module):
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
+        if len(out.size()) == 3 and out.size(2) != 1:
+            out = torch.sum(out, dim=2)
         out = out.view(out.size(0), -1)
+
         out = torch.nn.functional.relu(self.fc1(out))
         out = torch.sigmoid(self.fc2(out))
         return out
@@ -104,7 +107,8 @@ class RelationNet(nn.Module):
         query_set_encoded_ext = torch.transpose(query_set_encoded_ext, 0, 1)
 
         relation_pairs = torch.cat((support_set_encoded_ext, query_set_encoded_ext), 2).view(-1, encoded_dimension[0] * 2, *encoded_dimension[1:])
-        relations = self.relation_network(relation_pairs).view(-1, self.n_way)
+        # relations = self.relation_network(relation_pairs).view(-1, self.n_way)
+        relations = self.relation_network.forward(relation_pairs).view(-1, self.n_way)
 
         return relations
 
