@@ -1,0 +1,20 @@
+cd ~/agent3/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/relation_k_test_PS-B-FP-SP/3/*; do sbatch parametric_task_submitter_3_akya.sh relation_nets_train.py $i rn_k_test__PS-B-FP-SP; done
+
+cd ~/agent4/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/relation_k_test_PS-B-FP-SP/4/*; do sbatch parametric_task_submitter_4_akya.sh relation_nets_train.py $i rn_k_test__PS-B-FP-SP; done
+
+cd ~/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/prototypical_ann_k_test_PS-B-FP-SP/0/*; do sbatch parametric_task_submitter_0_akya.sh basic_train.py $i pn_ann_k_test__PS-B-FP-SP; done
+
+cd ~/agent1/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/prototypical_ann_k_test_PS-B-FP-SP/1/*; do sbatch parametric_task_submitter_1_akya.sh basic_train.py $i pn_ann_k_test__PS-B-FP-SP; done
+
+cd ~/agent2/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/prototypical_ann_k_test_PS-B-FP-SP/2/*; do sbatch parametric_task_submitter_2_akya.sh basic_train.py $i pn_ann_k_test__PS-B-FP-SP; done
+
+cd ~/agent3/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/prototypical_ann_k_test_PS-B-FP-SP/3/*; do sbatch parametric_task_submitter_3_akya.sh basic_train.py $i pn_ann_k_test__PS-B-FP-SP; done
+
+cd ~/agent4/FSL_IDS/dashboard/FSL_CICIDS2017/
+for i in test_parameters/prototypical_ann_k_test_PS-B-FP-SP/4/*; do sbatch parametric_task_submitter_4_akya.sh basic_train.py $i pn_ann_k_test__PS-B-FP-SP; done
